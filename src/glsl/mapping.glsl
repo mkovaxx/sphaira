@@ -84,19 +84,17 @@ float grid(float d, float s, vec2 uv) {
   return 1.0 - pow(p.x, s) - pow(p.y, s);
 }
 
-vec4 cubeMapFace(vec3 onSphere) {
+vec4 testCubeMap(vec3 onSphere) {
   vec3 p = abs(onSphere);
   vec3 dir = vec3(0.0);
   vec3 col = vec3(0.0);
   if (p.x >= p.y && p.x >= p.z) {
     dir = vec3(p.y, p.z, p.x);
     col = onSphere.x > 0.0 ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 1.0, 1.0);
-  }
-  if (p.y >= p.x && p.y >= p.z) {
+  } else if (p.y >= p.x && p.y >= p.z) {
     dir = vec3(p.x, p.z, p.y);
     col = onSphere.y > 0.0 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 1.0);
-  }
-  if (p.z >= p.x && p.z >= p.y) {
+  } else if (p.z >= p.x && p.z >= p.y) {
     dir = vec3(p.x, p.y, p.z);
     col = onSphere.z > 0.0 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 1.0, 0.0);
   }
@@ -106,8 +104,16 @@ vec4 cubeMapFace(vec3 onSphere) {
 
 void main(void) {
   vec2 onSquare = gl_FragCoord.xy / iResolution.xy;
-  vec3 onSphere = squareToSphere(onSquare);
-  gl_FragColor = cubeMapFace(onSphere.xzy);
-  //gl_FragColor = textureCube(iChannel0, onSphere.xzy);
+  vec3 onSphere = squareToSphere(onSquare).xzy;
+  /*
+  float t = 0.5 * iGlobalTime;
+  vec2 r = vec2(cos(t), sin(t));
+  onSphere = vec3(
+    onSphere.x * r.x + onSphere.z * r.y,
+    onSphere.y,
+    onSphere.x * r.y - onSphere.z * r.x);
+  */
+  gl_FragColor = testCubeMap(onSphere);
+  //gl_FragColor = textureCube(iChannel0, onSphere);
   //gl_FragColor = vec4(0.5 * onSphere + 0.5, 0.0);
 }
