@@ -75,17 +75,33 @@ vec3 squareToSphere(vec2 onSquare) {
   return diskPolarToSphere(onDiskPolar);
 }
 
+vec2 ontoPlane(vec3 dir) {
+  return dir.xy / dir.z;
+}
+
+float grid(float d, float s, vec2 uv) {
+  vec2 p = squareToCenteredSquare(mod(d * uv, 1.0));
+  return 1.0 - pow(p.x, s) - pow(p.y, s);
+}
+
 vec4 cubeMapFace(vec3 onSphere) {
   vec3 p = abs(onSphere);
+  vec3 dir = vec3(0.0);
+  vec3 col = vec3(0.0);
   if (p.x >= p.y && p.x >= p.z) {
-    return onSphere.x > 0.0 ? vec4(1.0, 0.0, 0.0, 0.0) : vec4(0.0, 1.0, 1.0, 0.0);
+    dir = vec3(p.y, p.z, p.x);
+    col = onSphere.x > 0.0 ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 1.0, 1.0);
   }
   if (p.y >= p.x && p.y >= p.z) {
-    return onSphere.y > 0.0 ? vec4(0.0, 1.0, 0.0, 0.0) : vec4(1.0, 0.0, 1.0, 0.0);
+    dir = vec3(p.x, p.z, p.y);
+    col = onSphere.y > 0.0 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 1.0);
   }
   if (p.z >= p.x && p.z >= p.y) {
-    return onSphere.z > 0.0 ? vec4(0.0, 0.0, 1.0, 0.0) : vec4(1.0, 1.0, 0.0, 0.0);
+    dir = vec3(p.x, p.y, p.z);
+    col = onSphere.z > 0.0 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 1.0, 0.0);
   }
+  vec2 uv = ontoPlane(dir);
+  return vec4(col * grid(8.0, 6.0, uv), 0.0);
 }
 
 void main(void) {
