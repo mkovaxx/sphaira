@@ -1,8 +1,8 @@
 /*
-square
+UV
 p : [0, 1]^2
 
-centered square
+square
 p : [-1, 1]^2
 
 disk
@@ -17,8 +17,12 @@ p : [-1, 1]^3
 float PI = radians(180.0);
 float PI_4 = PI / 4.0;
 
-vec2 squareToCenteredSquare(vec2 onSquare) {
-  return 2.0 * onSquare - 1.0;
+vec2 uvToSquare(vec2 uv) {
+  return 2.0 * uv - 1.0;
+}
+
+vec2 squareToUV(vec2 onSquare) {
+  return 0.5 * onSquare + 0.5;
 }
 
 vec2 scrollSquare(vec2 onSquare, vec2 scroll) {
@@ -26,28 +30,27 @@ vec2 scrollSquare(vec2 onSquare, vec2 scroll) {
 }
 
 vec2 squareToDiskPolar(vec2 onSquare) {
-  vec2 p = squareToCenteredSquare(onSquare);
-  vec2 foo = (p.x > -p.y) ? (
+  vec2 p = onSquare;
+  vec2 r = (p.x > -p.y) ? (
     // region 1 or 2
     (p.x > p.y) ? (
       // region 1, |p.x| > |p.y|
-      vec2(p.x, PI_4 * (0.0 + (p.y / p.x)))
+      vec2(p.x, 0.0 + p.y / p.x)
     ) : (
       // region 2, |p.x| < |p.y|
-      vec2(p.y, PI_4 * (2.0 - (p.x / p.y)))
+      vec2(p.y, 2.0 - p.x / p.y)
     )
   ) : (
     // region 3 or 4
     (p.x < p.y) ? (
       // region 3, |p.x| >= |p.y|
-      vec2(-p.x, PI_4 * (4.0 + (p.y / p.x)))
+      vec2(-p.x, 4.0 + p.y / p.x)
     ) : (
       // region 4, |p.x| <= |p.y|
-      vec2(-p.y, PI_4 * (6.0 - (p.x / p.y)))
+      vec2(-p.y, 6.0 - p.x / p.y)
     )
   );
-  vec2 q = foo.x * vec2(cos(foo.y), sin(foo.y));
-  return vec2(length(q), atan(q.y, q.x) + PI);
+  return vec2(r.x, PI_4 * mod(r.y, 8.0));
 }
 
 vec3 diskPolarToHemisphere(vec2 onDiskPolar) {
@@ -60,17 +63,17 @@ vec3 diskPolarToHemisphere(vec2 onDiskPolar) {
 vec3 diskPolarToSphere(vec2 onDiskPolar) {
   float r = onDiskPolar.x;
   float a = onDiskPolar.y;
-  vec3 foo = (a < PI) ?
+  vec3 foo = (a > PI) ?
     diskPolarToHemisphere(vec2(r, 2.0 * a)) :
     diskPolarToHemisphere(vec2(r, 2.0 * (2.0 * PI - a)));
-  if (a > PI) {
+  if (a < PI) {
     foo.z = -foo.z;
   }
   return foo;
 }
 
 vec3 squareToSphere(vec2 onSquare) {
-  vec2 onScrolledSquare = scrollSquare(onSquare, vec2(0.0, 0.5));
+  vec2 onScrolledSquare = vec2(onSquare.x, (onSquare.y > 0.0 ? -1.0 : 1.0) + onSquare.y);
   vec2 onDiskPolar = squareToDiskPolar(onScrolledSquare);
   return diskPolarToSphere(onDiskPolar);
 }
@@ -80,7 +83,7 @@ vec2 ontoPlane(vec3 dir) {
 }
 
 float grid(float d, float s, vec2 uv) {
-  vec2 p = squareToCenteredSquare(mod(d * uv, 1.0));
+  vec2 p = uvToSquare(mod(d * uv, 1.0));
   return 1.0 - pow(p.x, s) - pow(p.y, s);
 }
 
@@ -103,7 +106,10 @@ vec4 testCubeMap(vec3 onSphere) {
 }
 
 void main(void) {
-  vec2 onSquare = gl_FragCoord.xy / iResolution.xy;
+  vec2 uv = gl_FragCoord.xy / iResolution.xy;
+  vec2 onSquare = uvToSquare(uv);
+  //vec2 onDiskPolar = squareToDiskPolar(onSquare);
+  //vec2 onDisk = onDiskPolar.x * vec2(cos(onDiskPolar.y), sin(onDiskPolar.y));
   vec3 onSphere = squareToSphere(onSquare).xzy;
   /*
   float t = 0.5 * iGlobalTime;
@@ -116,4 +122,5 @@ void main(void) {
   gl_FragColor = testCubeMap(onSphere);
   //gl_FragColor = textureCube(iChannel0, onSphere);
   //gl_FragColor = vec4(0.5 * onSphere + 0.5, 0.0);
+  //gl_FragColor = vec4((0.5 * onDiskPolar.y / PI) * grid(8.0, 6.0, onDisk));
 }
