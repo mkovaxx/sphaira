@@ -66,7 +66,7 @@ vec3 squareToSphere(vec2 onSquare) {
   vec3 onDiamond = (d < 1.0) ? (
     vec3(onSquare, 1.0)
   ) : (
-    vec3(sign(onSquare) - onSquare, -1.0)
+    vec3(sign(onSquare) * (1.0 - a.yx), -1.0)
   );
   vec2 onSmallSquare = vec2(onDiamond.x + onDiamond.y, onDiamond.x - onDiamond.y);
   vec2 onDiskPolar = squareToDiskPolar(onSmallSquare);
@@ -108,12 +108,14 @@ void main(void) {
   //vec2 onDisk = onDiskPolar.x * vec2(cos(onDiskPolar.y), sin(onDiskPolar.y));
   vec3 onSphere = squareToSphere(onSquare).xzy;
   // rotate view about the Y axis
-  float t = 0.25 * PI;//0.1 * iGlobalTime;
+  /*
+  float t = 0.5 * iGlobalTime;
   vec2 r = vec2(cos(t), sin(t));
   onSphere = vec3(
     onSphere.x * r.x + onSphere.z * r.y,
     onSphere.y,
     onSphere.x * r.y - onSphere.z * r.x);
+  */
   gl_FragColor = testCubeMap(onSphere);
   //gl_FragColor = textureCube(iChannel0, onSphere);
   //gl_FragColor = vec4(0.5 * onSphere + 0.5, 0.0);
