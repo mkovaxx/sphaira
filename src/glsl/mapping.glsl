@@ -60,22 +60,18 @@ vec3 diskPolarToHemisphere(vec2 onDiskPolar) {
   return vec3(r * vec2(cos(a), sin(a)), z);
 }
 
-vec3 diskPolarToSphere(vec2 onDiskPolar) {
-  float r = onDiskPolar.x;
-  float a = onDiskPolar.y;
-  vec3 foo = (a > PI) ?
-    diskPolarToHemisphere(vec2(r, 2.0 * a)) :
-    diskPolarToHemisphere(vec2(r, 2.0 * (2.0 * PI - a)));
-  if (a < PI) {
-    foo.z = -foo.z;
-  }
-  return foo;
-}
-
 vec3 squareToSphere(vec2 onSquare) {
-  vec2 onScrolledSquare = vec2(onSquare.x, (onSquare.y > 0.0 ? -1.0 : 1.0) + onSquare.y);
-  vec2 onDiskPolar = squareToDiskPolar(onScrolledSquare);
-  return diskPolarToSphere(onDiskPolar);
+  vec2 a = abs(onSquare);
+  float d = a.x + a.y;
+  vec3 onDiamond = (d < 1.0) ? (
+    vec3(onSquare, 1.0)
+  ) : (
+    vec3(sign(onSquare) - onSquare, -1.0)
+  );
+  vec2 onSmallSquare = vec2(onDiamond.x + onDiamond.y, onDiamond.x - onDiamond.y);
+  vec2 onDiskPolar = squareToDiskPolar(onSmallSquare);
+  vec3 onHemisphere = diskPolarToHemisphere(onDiskPolar);
+  return vec3(onHemisphere.xy, onDiamond.z * onHemisphere.z);
 }
 
 vec2 ontoPlane(vec3 dir) {
@@ -111,14 +107,13 @@ void main(void) {
   //vec2 onDiskPolar = squareToDiskPolar(onSquare);
   //vec2 onDisk = onDiskPolar.x * vec2(cos(onDiskPolar.y), sin(onDiskPolar.y));
   vec3 onSphere = squareToSphere(onSquare).xzy;
-  /*
-  float t = 0.5 * iGlobalTime;
+  // rotate view about the Y axis
+  float t = 0.25 * PI;//0.1 * iGlobalTime;
   vec2 r = vec2(cos(t), sin(t));
   onSphere = vec3(
     onSphere.x * r.x + onSphere.z * r.y,
     onSphere.y,
     onSphere.x * r.y - onSphere.z * r.x);
-  */
   gl_FragColor = testCubeMap(onSphere);
   //gl_FragColor = textureCube(iChannel0, onSphere);
   //gl_FragColor = vec4(0.5 * onSphere + 0.5, 0.0);
