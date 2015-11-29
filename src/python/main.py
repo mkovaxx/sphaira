@@ -1,16 +1,15 @@
 import pyglet
 from pyglet import gl
+from pyrr import Quaternion, Vector3, Matrix44
 
 from grid import *
-from vqm import *
-
 
 class Sphaira(pyglet.window.Window):
 
     def __init__(self, **kwargs):
         super(Sphaira, self).__init__(**kwargs)
         self.t = 0.0
-        self.orientation = Quat(1, Vec3(0,0,0))
+        self.orientation = Quaternion()
         self.zoom = 1.0
         self.grid = Grid(100, 100)
 
@@ -41,9 +40,12 @@ class Sphaira(pyglet.window.Window):
             # the rotation vector is the displacement vector rotated by 90 degrees
             if dx == 0 and dy == 0:
                 return
-            v = Vec3(dy, -dx, 0).scale(0.002)
+            v = Vector3([dy, -dx, 0])
             # update the current orientation
-            self.orientation = self.orientation * v.rotation()
+            self.orientation *= Quaternion.from_axis_rotation(
+                v.normalised,
+                v.length * 0.002
+            )
         # zoom on right-drag
         if buttons & 4:
             self.zoom += self.zoom * dy*0.01
@@ -56,16 +58,12 @@ class Sphaira(pyglet.window.Window):
         glPushMatrix()
         glTranslatef(0, 0, -7.0)
         glScalef(self.zoom, self.zoom, self.zoom)
-        r = self.orientation.conj().matrix()
-        # column-major order
-        m = [r.X.x, r.X.y, r.X.z, 0,
-             r.Y.x, r.Y.y, r.Y.z, 0,
-             r.Z.x, r.Z.y, r.Z.z, 0,
-                 0,     0,     0, 1,]
-        array = (GLfloat * len(m))()
-        for index, value in enumerate(m):
-            array[index] = value
-        glMultMatrixf(array);
+        m = self.orientation.matrix44
+        array = (GLdouble * 16)()
+        for i in xrange(4):
+            for j in xrange(4):
+                array[4*i + j] = m[i,j]
+        glMultMatrixd(array);
         glPointSize(1.8)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
         self.grid.draw_triangles()
