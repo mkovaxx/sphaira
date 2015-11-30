@@ -39,6 +39,12 @@ class SphericalMesh(object):
                     base + i + 1,
                     base + cnt + i
                 ])
+                if i < cnt - 2:
+                    self.indices.extend([
+                        base + cnt + i + 1,
+                        base + cnt + i,
+                        base + i + 1
+                    ])
             base += cnt
 
     def draw_triangles(self):

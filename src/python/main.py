@@ -65,7 +65,7 @@ class Sphaira(pyglet.window.Window):
                 array[4*i + j] = m[i,j]
         glMultMatrixd(array);
         glPointSize(1.8)
-        glPolygonMode(GL_FRONT, GL_FILL)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
         glEnable(GL_CULL_FACE)
         glCullFace(GL_BACK)
         self.grid.draw_triangles()
