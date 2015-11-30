@@ -11,7 +11,7 @@ class Sphaira(pyglet.window.Window):
         self.t = 0.0
         self.orientation = Quaternion()
         self.zoom = 2.5
-        self.grid = SphericalMesh(15)
+        self.grid = SphericalMesh(4)
 
     def update(self, dt):
         self.t += dt
