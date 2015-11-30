@@ -4,21 +4,42 @@ from pyrr import Vector3
 
 class SphericalMesh(object):
 
-    def __init__(self):
+    def __init__(self, resolution):
+        self.resolution = resolution
         seed = Icosahedron()
-        vertices = seed.vertices
-        indices = []
+        self.vertices = []
+        self.indices = []
         for (i, j, k) in seed.triangles:
-            indices.extend([i, j, k])
+            self._subdiv_triangle(
+                seed.vertices[i],
+                seed.vertices[j],
+                seed.vertices[k],
+            )
         self.vertex_list = pyglet.graphics.vertex_list_indexed(
-            len(vertices),
-            indices,
+            len(self.vertices),
+            self.indices,
             ('v3d/static', [
                 coord
-                for vector in vertices
+                for vector in self.vertices
                 for coord in vector
             ]),
         )
+
+    def _subdiv_triangle(self, a, b, c):
+        base = len(self.vertices)
+        dx = (b - a) / self.resolution
+        dy = (c - a) / self.resolution
+        for j in xrange(0, self.resolution + 1):
+            cnt = self.resolution + 1 - j
+            for i in xrange(0, cnt):
+                self.vertices.append((a + i*dx + j*dy).normalised)
+            for i in xrange(0, cnt - 1):
+                self.indices.extend([
+                    base + i,
+                    base + i + 1,
+                    base + cnt + i
+                ])
+            base += cnt
 
     def draw_triangles(self):
         self.vertex_list.draw(gl.GL_TRIANGLES)

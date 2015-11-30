@@ -10,8 +10,8 @@ class Sphaira(pyglet.window.Window):
         super(Sphaira, self).__init__(**kwargs)
         self.t = 0.0
         self.orientation = Quaternion()
-        self.zoom = 1.0
-        self.grid = SphericalMesh()
+        self.zoom = 2.5
+        self.grid = SphericalMesh(15)
 
     def update(self, dt):
         self.t += dt
@@ -65,7 +65,7 @@ class Sphaira(pyglet.window.Window):
                 array[4*i + j] = m[i,j]
         glMultMatrixd(array);
         glPointSize(1.8)
-        glPolygonMode(GL_FRONT, GL_LINE)
+        glPolygonMode(GL_FRONT, GL_FILL)
         glEnable(GL_CULL_FACE)
         glCullFace(GL_BACK)
         self.grid.draw_triangles()
