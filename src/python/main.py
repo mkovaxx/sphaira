@@ -78,4 +78,5 @@ def main():
     pyglet.clock.schedule_interval(window.update, (1.0/60))
     pyglet.app.run()
 
-if __name__ == '__main__': main()
+if __name__ == '__main__':
+    main()
