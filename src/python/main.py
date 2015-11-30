@@ -1,8 +1,8 @@
 import pyglet
-from pyglet import gl
+from pyglet.gl import *
 from pyrr import Quaternion, Vector3, Matrix44
 
-from grid import *
+from geom import SphericalMesh
 
 class Sphaira(pyglet.window.Window):
 
@@ -11,7 +11,7 @@ class Sphaira(pyglet.window.Window):
         self.t = 0.0
         self.orientation = Quaternion()
         self.zoom = 1.0
-        self.grid = Grid(100, 100)
+        self.grid = SphericalMesh()
 
     def update(self, dt):
         self.t += dt
@@ -66,7 +66,7 @@ class Sphaira(pyglet.window.Window):
         glMultMatrixd(array);
         glPointSize(1.8)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
-        self.grid.draw_triangles()
+        self.grid.draw_points()
         glPopMatrix()
 
 
