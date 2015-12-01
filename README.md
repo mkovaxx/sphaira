@@ -1,4 +1,4 @@
 sphaira
 =======
 
-Library for manipulating various representations of spherical images.
+Utility and library for viewing and editing spherical images.
