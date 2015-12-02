@@ -1,3 +1,5 @@
+import numpy as np
+from PIL import Image
 import pyglet
 from pyglet.gl import *
 from pyrr import Quaternion, Vector3, Matrix44
@@ -40,13 +42,15 @@ class Sphaira(pyglet.window.Window):
             GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
             GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
         )
-        image = pyglet.image.load("resources/puppy.jpg")
-        data = image.get_data('RGBA', image.width * 4)
+        image = Image.open("resources/puppy.jpg")
+        array = np.array(image)
+        # the reverse direction: image = Image.fromarray(array)
+        data = array.ctypes.data
         for cube_face in cube_faces:
             glTexImage2D(
                 cube_face, 0,
-                GL_RGBA, image.width, image.height, 0,
-                GL_RGBA, GL_UNSIGNED_BYTE, data
+                GL_RGB, image.width, image.height, 0,
+                GL_RGB, GL_UNSIGNED_BYTE, data
             )
         # set up texture coordinates
         glEnable(GL_TEXTURE_GEN_S)
