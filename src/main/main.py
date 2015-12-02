@@ -10,6 +10,7 @@ class Sphaira(pyglet.window.Window):
 
     def __init__(self, **kwargs):
         super(Sphaira, self).__init__(**kwargs)
+        self.maximize()
         self.t = 0.0
         self.orientation = Quaternion()
         self.zoom = 2.5
