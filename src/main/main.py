@@ -14,7 +14,7 @@ class Sphaira(pyglet.window.Window):
         self.t = 0.0
         self.orientation = Quaternion()
         self.zoom = 2.5
-        self.grid = SphericalMesh(4)
+        self.mesh = SphericalMesh(4)
         self.load_texture()
 
     def load_texture(self):
@@ -125,7 +125,7 @@ class Sphaira(pyglet.window.Window):
         # draw stuff
         glColor3f(0.0, 0.5, 1.0)
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)
-        self.grid.draw_triangles()
+        self.mesh.draw_triangles()
         glPopMatrix()
 
 
