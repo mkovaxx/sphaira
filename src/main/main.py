@@ -18,7 +18,8 @@ class Sphaira(pyglet.window.Window):
         self.mesh = SphericalMesh(4)
         self.file_name = "resources/puppy.jpg"
         # the reverse direction: image = Image.fromarray(array)
-        self.cube_map = CubeMap.from_array(np.array(Image.open(self.file_name)))
+        image = Image.open(self.file_name).convert('RGBA')
+        self.cube_map = CubeMap.from_array(np.array(image))
         self.send_cube_map_to_gl(self.cube_map)
 
     def update(self, dt):
@@ -114,8 +115,8 @@ class Sphaira(pyglet.window.Window):
             data = cube_map.faces[face_index].ctypes.data
             glTexImage2D(
                 cube_face, 0,
-                GL_RGB, width, height, 0,
-                GL_RGB, GL_UNSIGNED_BYTE, data
+                GL_RGBA, width, height, 0,
+                GL_RGBA, GL_UNSIGNED_BYTE, data
             )
         # set up texture coordinates
         glEnable(GL_TEXTURE_GEN_S)

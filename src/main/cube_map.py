@@ -10,6 +10,7 @@ class CubeMap(object):
         (face_count, width, height, depth) = faces.shape
         assert face_count == 6
         assert width == height
+        assert depth == 4
         return CubeMap(faces)
 
     def __init__(self, faces):
