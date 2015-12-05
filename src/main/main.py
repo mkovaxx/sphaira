@@ -5,6 +5,7 @@ from pyglet.gl import *
 from pyrr import Quaternion, Vector3, Matrix44
 
 from cube_map import CubeMap
+from equirect import Equirect
 from geom import SphericalMesh
 
 class Sphaira(pyglet.window.Window):
@@ -16,10 +17,11 @@ class Sphaira(pyglet.window.Window):
         self.orientation = Quaternion()
         self.zoom = 2.5
         self.mesh = SphericalMesh(4)
-        self.file_name = "resources/puppy.jpg"
+        self.file_name = "resources/mars-eqr.jpg"
         # the reverse direction: image = Image.fromarray(array)
         image = Image.open(self.file_name).convert('RGBA')
-        self.cube_map = CubeMap.from_array(np.array(image))
+        equirect = Equirect.from_array(np.array(image))
+        self.cube_map = CubeMap.from_sphere(equirect)
         self.send_cube_map_to_gl(self.cube_map)
 
     def update(self, dt):
