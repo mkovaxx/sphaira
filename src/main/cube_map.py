@@ -1,12 +1,10 @@
 import numpy as np
-from PIL import Image
 from pyrr import Vector3
 
 class CubeMap(object):
 
     @classmethod
-    def from_image(self, image):
-        array = np.array(image)
+    def from_array(self, array):
         faces = np.array([array] * 6)
         return CubeMap(faces)
 

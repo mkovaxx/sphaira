@@ -18,7 +18,7 @@ class Sphaira(pyglet.window.Window):
         self.mesh = SphericalMesh(4)
         self.file_name = "resources/puppy.jpg"
         # the reverse direction: image = Image.fromarray(array)
-        self.cube_map = CubeMap.from_image(Image.open(self.file_name))
+        self.cube_map = CubeMap.from_array(np.array(Image.open(self.file_name)))
         self.send_cube_map_to_gl(self.cube_map)
 
     def update(self, dt):
