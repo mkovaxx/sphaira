@@ -20,7 +20,8 @@ class Sphaira(pyglet.window.Window):
         self.file_name = "resources/mars-eqr.jpg"
         # the reverse direction: image = Image.fromarray(array)
         image = Image.open(self.file_name).convert('RGBA')
-        equirect = Equirect.from_array(np.array(image))
+        array = np.array(image, dtype=np.float32) / 255
+        equirect = Equirect.from_array(array)
         self.cube_map = CubeMap.from_sphere(equirect)
         self.send_cube_map_to_gl(self.cube_map)
 
@@ -112,13 +113,13 @@ class Sphaira(pyglet.window.Window):
             GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
         )
         for (face_index, cube_face) in enumerate(cube_faces):
-            (face_count, width, height, depth) = cube_map.faces.shape
+            (face_count, height, width, depth) = cube_map.faces.shape
             assert face_count == 6
             data = cube_map.faces[face_index].ctypes.data
             glTexImage2D(
                 cube_face, 0,
                 GL_RGBA, width, height, 0,
-                GL_RGBA, GL_UNSIGNED_BYTE, data
+                GL_RGBA, GL_FLOAT, data
             )
         # set up texture coordinates
         glEnable(GL_TEXTURE_GEN_S)
