@@ -111,9 +111,9 @@ class Sphaira(pyglet.window.Window):
             GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
             GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
         )
+        (face_count, height, width, depth) = cube_map.faces.shape
+        assert face_count == 6
         for (face_index, cube_face) in enumerate(cube_faces):
-            (face_count, height, width, depth) = cube_map.faces.shape
-            assert face_count == 6
             data = cube_map.faces[face_index].ctypes.data
             glTexImage2D(
                 cube_face, 0,
