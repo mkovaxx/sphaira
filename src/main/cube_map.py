@@ -11,12 +11,12 @@ class CubeMap(object):
     @classmethod
     def from_sphere(cls, sphere):
         projs = [
-            lambda t, u: Vector3([+1, t, u]),
-            lambda t, u: Vector3([-1, t, u]),
-            lambda t, u: Vector3([u, -1, t]),
-            lambda t, u: Vector3([u, +1, t]),
-            lambda t, u: Vector3([t, u, +1]),
-            lambda t, u: Vector3([t, u, -1]),
+            lambda t, u: Vector3([+1, -u, -t]), # +X
+            lambda t, u: Vector3([-1, -u, +t]), # -X
+            lambda t, u: Vector3([+t, +1, +u]), # +Y
+            lambda t, u: Vector3([+t, -1, -u]), # -Y
+            lambda t, u: Vector3([+t, -u, +1]), # +Z
+            lambda t, u: Vector3([-t, -u, -1]), # -Z
         ]
         size = 128
         faces = np.zeros((6, size, size, 4), dtype=np.float32)
