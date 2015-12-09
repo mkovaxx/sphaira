@@ -1,6 +1,9 @@
 import numpy as np
 from pyrr import Vector3
 
+lib = ctypes.cdll.LoadLibrary('./libsphaira.so')
+equirect_sample = lib.equirect_sample
+
 class Equirect(object):
 
     @classmethod
