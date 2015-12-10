@@ -16,6 +16,7 @@ class Equirect(object):
         (height, width, depth) = array.shape
         assert width == 2*height
         assert depth == 4
+        assert equirect_check(ctypes.py_object(array)) == 0
         self.array = array
 
     def sample(self, v):

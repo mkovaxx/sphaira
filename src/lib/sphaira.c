@@ -1,7 +1,5 @@
 #include <math.h>
 #include <Python.h>
-#include <numpy/arrayobject.h>
-#include <numpy/npy_common.h>
 
 /*
 typedef void (*Sampler)(PyArrayInterface*, float[3], float[4]);
@@ -23,20 +21,23 @@ void frustum_zm(float t, float u, float out[3]) { out[0] = -t; out[1] = -u; out[
 };
 */
 
-int cube_map_check(PyCObject *py_obj) {
-  PyArrayInterface* cube_map = PyCObject_AsVoidPtr(py_obj);
-  if (cube_map->two != 2) return 1;
-  if (cube_map->nd != 4) return 2;
-  if (cube_map->typekind != 'f') return 3;
-  if (cube_map->itemsize != 4) return 4;
-  int face_count = cube_map->shape[0];
-  int height = cube_map->shape[1];
-  int width = cube_map->shape[2];
-  int depth = cube_map->shape[3];
-  if (face_count != 6) return 5;
-  if (height != width) return 6;
-  if (depth != 4) return 7;
-  return 0;
+int cube_map_check(PyObject *py_obj) {
+  int ret;
+  Py_buffer cube_map;
+  ret = PyObject_GetBuffer(py_obj, &cube_map, PyBUF_STRIDED);
+  if (ret != 0) { ret = 1; goto exit; }
+  if (cube_map.ndim != 4) { ret = 2; goto exit; }
+  if (cube_map.itemsize != 4) { ret = 3; goto exit; }
+  int face_count = cube_map.shape[0];
+  int height = cube_map.shape[1];
+  int width = cube_map.shape[2];
+  int depth = cube_map.shape[3];
+  if (face_count != 6) { ret = 4; goto exit; }
+  if (height != width) { ret = 5; goto exit; }
+  if (depth != 4) { ret = 6; goto exit; }
+exit:
+  PyBuffer_Release(&cube_map);
+  return ret;
 }
 
 /*
@@ -65,17 +66,21 @@ void cube_map_assign(PyArrayInterface *cube_map, Sampler sample, PyArrayInterfac
 }
 */
 
-int equirect_check(PyArrayInterface *equirect) {
-  if (equirect->two != 2) return 1;
-  if (equirect->nd != 3) return 2;
-  if (equirect->typekind != 'f') return 3;
-  if (equirect->itemsize != 4) return 4;
-  int height = equirect->shape[0];
-  int width = equirect->shape[1];
-  int depth = equirect->shape[2];
-  if (width != 2*height) return 5;
-  if (depth != 4) return 6;
-  return 0;
+int equirect_check(PyObject *py_obj) {
+  int ret;
+  Py_buffer equirect;
+  ret = PyObject_GetBuffer(py_obj, &equirect, PyBUF_STRIDED);
+  if (ret != 0) { ret = 1; goto exit; }
+  if (equirect.ndim != 3) { ret = 2; goto exit; }
+  if (equirect.itemsize != 4) { ret = 3; goto exit; }
+  int height = equirect.shape[0];
+  int width = equirect.shape[1];
+  int depth = equirect.shape[2];
+  if (width != 2*height) return 4;
+  if (depth != 4) return 5;
+exit:
+  PyBuffer_Release(&equirect);
+  return ret;
 }
 
 /*

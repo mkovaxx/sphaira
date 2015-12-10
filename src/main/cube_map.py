@@ -32,10 +32,10 @@ class CubeMap(object):
         return CubeMap(faces)
 
     def __init__(self, faces):
-        print 'check: %s' % cube_map_check(ctypes.py_object(faces.__array_struct__))
         assert len(faces.shape) == 4
         (face_count, width, height, depth) = faces.shape
         assert face_count == 6
         assert width == height
         assert depth == 4
+        assert cube_map_check(ctypes.py_object(faces)) == 0
         self.faces = faces
