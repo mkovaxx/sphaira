@@ -23,7 +23,8 @@ void frustum_zm(float t, float u, float out[3]) { out[0] = -t; out[1] = -u; out[
 };
 */
 
-int cube_map_check(PyArrayInterface *cube_map) {
+int cube_map_check(PyCObject *py_obj) {
+  PyArrayInterface* cube_map = PyCObject_AsVoidPtr(py_obj);
   if (cube_map->two != 2) return 1;
   if (cube_map->nd != 4) return 2;
   if (cube_map->typekind != 'f') return 3;

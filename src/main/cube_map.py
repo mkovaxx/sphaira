@@ -22,7 +22,7 @@ class CubeMap(object):
             lambda t, u: Vector3([+t, -u, +1]), # +Z
             lambda t, u: Vector3([-t, -u, -1]), # -Z
         ]
-        size = 128
+        size = 8
         faces = np.zeros((6, size, size, 4), dtype=np.float32)
         for (face, proj) in enumerate(projs):
             for y in xrange(size):
@@ -32,6 +32,7 @@ class CubeMap(object):
         return CubeMap(faces)
 
     def __init__(self, faces):
+        print 'check: %s' % cube_map_check(ctypes.py_object(faces.__array_struct__))
         assert len(faces.shape) == 4
         (face_count, width, height, depth) = faces.shape
         assert face_count == 6
