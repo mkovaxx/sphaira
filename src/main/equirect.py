@@ -1,8 +1,9 @@
+import ctypes
 import numpy as np
 from pyrr import Vector3
 
-lib = ctypes.cdll.LoadLibrary('./libsphaira.so')
-equirect_sample = lib.equirect_sample
+lib = ctypes.cdll.LoadLibrary('build/libsphaira.so')
+equirect_check = lib.equirect_check
 
 class Equirect(object):
 

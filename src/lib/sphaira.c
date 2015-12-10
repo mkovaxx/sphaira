@@ -1,18 +1,9 @@
-#include <Python.h>
 #include <math.h>
+#include <Python.h>
+#include <numpy/arrayobject.h>
+#include <numpy/npy_common.h>
 
-typedef struct {
-  int two;
-  int nd;
-  char typekind;
-  int itemsize;
-  int flags;
-  npy_intp *shape;
-  npy_intp *strides;
-  void *data;
-  PyObject *descr;
-} PyArrayInterface;
-
+/*
 typedef void (*Sampler)(PyArrayInterface*, float[3], float[4]);
 
 void frustum_xp(float t, float u, float out[3]) { out[0] = +1; out[1] = -u; out[2] = -t; }
@@ -30,6 +21,7 @@ void frustum_zm(float t, float u, float out[3]) { out[0] = -t; out[1] = -u; out[
   frustum_zp,
   frustum_zm,
 };
+*/
 
 int cube_map_check(PyArrayInterface *cube_map) {
   if (cube_map->two != 2) return 1;
@@ -46,6 +38,7 @@ int cube_map_check(PyArrayInterface *cube_map) {
   return 0;
 }
 
+/*
 void cube_map_assign(PyArrayInterface *cube_map, Sampler sample, PyArrayInterface *sphere) {
   int size = cube_map->shape[1];
   int f_stride = cube_map->strides[0];
@@ -69,20 +62,22 @@ void cube_map_assign(PyArrayInterface *cube_map, Sampler sample, PyArrayInterfac
   }
   return 0;
 }
+*/
 
 int equirect_check(PyArrayInterface *equirect) {
   if (equirect->two != 2) return 1;
   if (equirect->nd != 3) return 2;
   if (equirect->typekind != 'f') return 3;
   if (equirect->itemsize != 4) return 4;
-  int height = cube_map->shape[0];
-  int width = cube_map->shape[1];
-  int depth = cube_map->shape[2];
+  int height = equirect->shape[0];
+  int width = equirect->shape[1];
+  int depth = equirect->shape[2];
   if (width != 2*height) return 5;
   if (depth != 4) return 6;
   return 0;
 }
 
+/*
 void equirect_sample(PyArrayInterface *sphere, float v[3], float s[4]) {
   int height = equirect->shape[0];
   int width = equirect->shape[1];
@@ -101,3 +96,4 @@ void equirect_sample(PyArrayInterface *sphere, float v[3], float s[4]) {
     s[d] = *(float*)(data + y*y_stride + x*x_stride + d*d_stride);
   }
 }
+*/

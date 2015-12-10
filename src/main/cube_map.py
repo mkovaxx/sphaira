@@ -1,8 +1,9 @@
+import ctypes
 import numpy as np
 from pyrr import Vector3
 
-lib = ctypes.cdll.LoadLibrary('./libsphaira.so')
-cube_map_assign = lib.cube_map_assign
+lib = ctypes.cdll.LoadLibrary('build/libsphaira.so')
+cube_map_check = lib.cube_map_check
 
 class CubeMap(object):
 
