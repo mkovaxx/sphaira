@@ -1,9 +1,6 @@
-import ctypes
 import numpy as np
 from pyrr import Vector3
 
-lib = ctypes.cdll.LoadLibrary('build/libsphaira.so')
-cube_map_check = lib.cube_map_check
 
 class CubeMap(object):
 
@@ -37,5 +34,4 @@ class CubeMap(object):
         assert face_count == 6
         assert width == height
         assert depth == 4
-        assert cube_map_check(ctypes.py_object(faces)) == 0
         self.faces = faces
