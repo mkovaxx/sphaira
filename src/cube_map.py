@@ -23,7 +23,7 @@ class CubeMap(object):
         ]
         size = 1024
         faces = np.zeros((6, size, size, 4), dtype=np.float32)
-        sphaira.cube_map_assign(faces, sphere)
+        sphaira.cube_map_assign(faces, sphere.array)
         # for (face, proj) in enumerate(projs):
         #     for y in xrange(size):
         #         for x in xrange(size):

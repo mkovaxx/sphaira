@@ -8,6 +8,8 @@ static PyObject* equirect_check(PyObject* self, PyObject* args);
 
 static PyObject* cube_map_assign(PyObject* self, PyObject* args);
 
+static void equirect_sample(PyArrayObject* equirect, float* v, float* s);
+
 static PyMethodDef SphairaFunctions[] = {
   /* check */
   { "cube_map_check", cube_map_check, METH_VARARGS
@@ -109,10 +111,7 @@ static PyObject* cube_map_assign(PyObject* self, PyObject* args)
           case 4: v[0] = +t; v[1] = -u; v[2] = +1; break;
           case 5: v[0] = -t; v[1] = -u; v[2] = -1; break;
         }
-        s[0] = 0.5*v[0] + 0.5;
-        s[1] = 0.5*v[1] + 0.5;
-        s[2] = 0.5*v[2] + 0.5;
-        s[3] = 0;
+        equirect_sample(data_sphere, v, s);
         for (d = 0; d < 4; d++) {
           *(float*)(data + f*sf + y*sy + x*sx + d*sd) = s[d];
         }
@@ -120,6 +119,26 @@ static PyObject* cube_map_assign(PyObject* self, PyObject* args)
     }
   }
   return Py_None;
+}
+
+static void equirect_sample(PyArrayObject* equirect, float* v, float* s) {
+  int height = PyArray_DIM(equirect, 0);
+  int width = PyArray_DIM(equirect, 1);
+  int sy = PyArray_STRIDE(equirect, 0);
+  int sx = PyArray_STRIDE(equirect, 1);
+  int sd = PyArray_STRIDE(equirect, 2);
+  float phi = atan2(v[1], v[0]);
+  float r = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+  float theta = acos(v[2] / r);
+  float t = phi/(2*M_PI) + 0.5;
+  float u = theta/M_PI;
+  int x = t*(width - 1);
+  int y = u*(height - 1);
+  int d;
+  void* data = PyArray_DATA(equirect);
+  for (d = 0; d < 4; d++) {
+    s[d] = *(float*)(data + y*sy + x*sx + d*sd);
+  }
 }
 
 /* This initiates the module using the above definitions. */
