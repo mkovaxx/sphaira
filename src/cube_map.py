@@ -21,13 +21,14 @@ class CubeMap(object):
             lambda t, u: Vector3([+t, -u, +1]), # +Z
             lambda t, u: Vector3([-t, -u, -1]), # -Z
         ]
-        size = 8
+        size = 1024
         faces = np.zeros((6, size, size, 4), dtype=np.float32)
-        for (face, proj) in enumerate(projs):
-            for y in xrange(size):
-                for x in xrange(size):
-                    v = proj(2.0*x/size - 1, 2.0*y/size - 1)
-                    faces[face, y, x] = sphere.sample(v)
+        sphaira.cube_map_assign(faces, sphere)
+        # for (face, proj) in enumerate(projs):
+        #     for y in xrange(size):
+        #         for x in xrange(size):
+        #             v = proj(2.0*x/size - 1, 2.0*y/size - 1)
+        #             faces[face, y, x] = sphere.sample(v)
         return CubeMap(faces)
 
     def __init__(self, faces):
