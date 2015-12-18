@@ -1,6 +1,8 @@
 import numpy as np
 from pyrr import Vector3
 
+import lib.sphaira as sphaira
+
 
 class Equirect(object):
 
@@ -13,6 +15,7 @@ class Equirect(object):
         (height, width, depth) = array.shape
         assert width == 2*height
         assert depth == 4
+        assert sphaira.equirect_check(array) == 0
         self.array = array
 
     def sample(self, v):

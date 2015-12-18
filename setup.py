@@ -13,7 +13,7 @@ setup(
     version = "0.0.1",
     packages = find_packages('src'),
     package_dir = {'':'src'},
-    install_requires = ['pyglet', 'pyrr'],
+    install_requires = ['pillow', 'pyglet', 'pyrr'],
     entry_points = {
         'gui_scripts': [
             'sphaira = main:main',
