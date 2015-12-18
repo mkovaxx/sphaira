@@ -1,6 +1,8 @@
 import numpy as np
 from pyrr import Vector3
 
+import lib.sphaira as sphaira
+
 
 class CubeMap(object):
 
@@ -34,4 +36,5 @@ class CubeMap(object):
         assert face_count == 6
         assert width == height
         assert depth == 4
+        assert sphaira.cube_map_check(faces) == 0
         self.faces = faces

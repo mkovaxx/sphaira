@@ -3,16 +3,47 @@
 #include <math.h>
 
 
+static PyObject* cube_map_check(PyObject* self, PyObject* args);
 static PyObject* equirect_check(PyObject* self, PyObject* args);
 
 static PyMethodDef SphairaFunctions[] =
-{ { "equirect_check"
-  , equirect_check
-  , METH_VARARGS
+{ { "cube_map_check", cube_map_check, METH_VARARGS
+  , "check if array has the shape of a cube map array"
+  }
+, { "equirect_check", equirect_check, METH_VARARGS
   , "check if array has the shape of an equirectangular image"
   }
 , {NULL, NULL, 0, NULL}
 };
+
+static PyObject* cube_map_check(PyObject* self, PyObject* args)
+{
+  int ret = 0;
+  PyArrayObject* cube_map;
+  if (!PyArg_ParseTuple(args, "O", &cube_map)) {
+    ret = 1; goto exit;
+  }
+  if (PyArray_Check(cube_map) == 0) {
+    ret = 2; goto exit;
+  }
+  if (PyArray_TYPE(cube_map) != NPY_FLOAT32) {
+    ret = 3; goto exit;
+  }
+  if (PyArray_NDIM(cube_map) != 4) {
+    ret = 4; goto exit;
+  }
+  if (PyArray_DIM(cube_map, 3) != 4) {
+    ret = 5; goto exit;
+  }
+  if (PyArray_DIM(cube_map, 0) != 6) {
+    ret = 6; goto exit;
+  }
+  if (PyArray_DIM(cube_map, 1) != PyArray_DIM(cube_map, 2)) {
+    ret = 7; goto exit;
+  }
+exit:
+  return PyInt_FromLong(ret);
+}
 
 static PyObject* equirect_check(PyObject* self, PyObject* args)
 {
@@ -39,7 +70,6 @@ static PyObject* equirect_check(PyObject* self, PyObject* args)
 exit:
   return PyInt_FromLong(ret);
 }
-
 
 /* This initiates the module using the above definitions. */
 #if PY_VERSION_HEX >= 0x03000000
