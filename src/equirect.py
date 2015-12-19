@@ -6,6 +6,8 @@ import lib.sphaira as sphaira
 
 class Equirect(object):
 
+    sampler = sphaira.equirect_get_sampler()
+
     @classmethod
     def from_array(self, array):
         return Equirect(array)
