@@ -3,24 +3,30 @@
 #include <math.h>
 
 
+typedef void (*Sampler)(PyArrayObject* equirect, float* v, float* s);
+
 static PyObject* cube_map_check(PyObject* self, PyObject* args);
 static PyObject* equirect_check(PyObject* self, PyObject* args);
 
 static PyObject* cube_map_assign(PyObject* self, PyObject* args);
 
-static void equirect_sample(PyArrayObject* equirect, float* v, float* s);
+static PyObject* equirect_get_sampler(PyObject* self, PyObject* args);
 
 static PyMethodDef SphairaFunctions[] = {
   /* check */
   { "cube_map_check", cube_map_check, METH_VARARGS
-  , "check if array has the shape of a cube map array"
+  , "check if array has the shape of a cube map projection"
   }
 , { "equirect_check", equirect_check, METH_VARARGS
-  , "check if array has the shape of an equirectangular image"
+  , "check if array has the shape for an equirectangular projection"
   }
   /* assign */
 , { "cube_map_assign", cube_map_assign, METH_VARARGS
   , "assign the cube map from an image sphere"
+  }
+  /* sample */
+, { "equirect_get_sampler", equirect_get_sampler, METH_VARARGS
+  , "get the sampler for equirectangular projections"
   }
 , {NULL, NULL, 0, NULL}
 };
@@ -84,9 +90,11 @@ static PyObject* cube_map_assign(PyObject* self, PyObject* args)
 {
   PyArrayObject* cube_map;
   PyArrayObject* data_sphere;
-  if (!PyArg_ParseTuple(args, "OO", &cube_map, &data_sphere)) {
+  PyObject* sampler_cobj;
+  if (!PyArg_ParseTuple(args, "OOO", &cube_map, &data_sphere, &sampler_cobj)) {
     return NULL;
   }
+  Sampler sampler = PyCObject_AsVoidPtr(sampler_cobj);
   int size = PyArray_DIM(cube_map, 1);
   void* data = PyArray_DATA(cube_map);
   int sf = PyArray_STRIDE(cube_map, 0);
@@ -111,7 +119,7 @@ static PyObject* cube_map_assign(PyObject* self, PyObject* args)
           case 4: v[0] = +t; v[1] = -u; v[2] = +1; break;
           case 5: v[0] = -t; v[1] = -u; v[2] = -1; break;
         }
-        equirect_sample(data_sphere, v, s);
+        sampler(data_sphere, v, s);
         for (d = 0; d < 4; d++) {
           *(float*)(data + f*sf + y*sy + x*sx + d*sd) = s[d];
         }
@@ -139,6 +147,10 @@ static void equirect_sample(PyArrayObject* equirect, float* v, float* s) {
   for (d = 0; d < 4; d++) {
     s[d] = *(float*)(data + y*sy + x*sx + d*sd);
   }
+}
+
+static PyObject* equirect_get_sampler(PyObject* self, PyObject* args) {
+  return PyCObject_FromVoidPtr(equirect_sample, NULL);
 }
 
 /* This initiates the module using the above definitions. */
