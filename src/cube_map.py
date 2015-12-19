@@ -38,4 +38,4 @@ class CubeMap(object):
         assert width == height
         assert depth == 4
         assert sphaira.cube_map_check(faces) == 0
-        self.faces = faces
+        self.array = faces
