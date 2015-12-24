@@ -31,16 +31,6 @@ class Sphaira(pyglet.window.Window):
     def update(self, dt):
         self.t += dt
 
-    def on_resize(self, width, height):
-        glViewport(0, 0, width, height)
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        gluPerspective(50, width / float(height), .01, 100)
-        glMatrixMode(GL_MODELVIEW)
-        glDepthFunc(GL_LESS)
-        glEnable(GL_DEPTH_TEST)
-        return pyglet.event.EVENT_HANDLED
-
     def on_mouse_press(self, x, y, button, modifiers):
         # self.set_exclusive_mouse()
         return
@@ -66,9 +56,13 @@ class Sphaira(pyglet.window.Window):
             self.zoom += self.zoom * dy*0.01
 
     def on_draw(self):
-        glDepthFunc(GL_LESS)
-        glEnable(GL_DEPTH_TEST)
+        glViewport(0, 0, self.width, self.height)
         self.clear()
+        glEnable(GL_DEPTH_TEST)
+        glDepthFunc(GL_LESS)
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        gluPerspective(50, self.width / float(self.height), .01, 100)
         glMatrixMode(GL_MODELVIEW)
         glPushMatrix()
         glTranslatef(0, 0, -7.0)
