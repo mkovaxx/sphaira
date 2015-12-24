@@ -1,3 +1,4 @@
+import argparse
 import numpy as np
 from PIL import Image
 import pyglet
@@ -17,9 +18,11 @@ class Sphaira(pyglet.window.Window):
         self.orientation = Quaternion()
         self.zoom = 2.5
         self.mesh = SphericalMesh(4)
-        self.file_name = "resources/mars-eqr.jpg"
+        self.cube_map = None
+
+    def load_file(self, file_name):
         # the reverse direction: image = Image.fromarray(array)
-        image = Image.open(self.file_name).convert('RGBA')
+        image = Image.open(file_name).convert('RGBA')
         array = np.array(image, dtype=np.float32) / 255
         equirect = Equirect.from_array(array)
         self.cube_map = CubeMap.from_sphere(equirect)
@@ -136,8 +139,15 @@ class Sphaira(pyglet.window.Window):
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        prog='sphaira',
+        description='Image sphere viewer and processor.',
+    )
+    parser.add_argument('input', help='INPUT')
+    args = parser.parse_args()
     config = pyglet.gl.Config(sample_buffers=1, samples=4, double_buffer=True, depth_size=24)
     window = Sphaira(caption='Sphaira', resizable=True, vsync=True, config=config)
+    window.load_file(args.input)
     pyglet.clock.schedule_interval(window.update, (1.0/60))
     pyglet.app.run()
 
