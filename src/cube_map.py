@@ -7,6 +7,21 @@ import lib.sphaira as sphaira
 class CubeMap(object):
 
     @classmethod
+    def check(cls, array):
+        if array.dtype != np.float32:
+            return 1
+        if len(array.shape) != 4:
+            return 2
+        (face_count, width, height, depth) = array.shape
+        if depth != 4:
+            return 4
+        if face_count != 6:
+            return 2
+        if width != height:
+            return 3
+        return 0
+
+    @classmethod
     def from_array(cls, array):
         faces = np.array([array] * 6)
         return CubeMap(faces)
@@ -32,10 +47,6 @@ class CubeMap(object):
         return CubeMap(faces)
 
     def __init__(self, faces):
-        assert len(faces.shape) == 4
-        (face_count, width, height, depth) = faces.shape
-        assert face_count == 6
-        assert width == height
-        assert depth == 4
+        assert CubeMap.check(faces) == 0
         assert sphaira.cube_map_check(faces) == 0
         self.array = faces

@@ -9,14 +9,24 @@ class Equirect(object):
     sampler = sphaira.equirect_get_sampler()
 
     @classmethod
+    def check(cls, array):
+        if array.dtype != np.float32:
+            return 1
+        if len(array.shape) != 3:
+            return 2
+        (height, width, depth) = array.shape
+        if depth != 4:
+            return 3
+        if width != 2*height:
+            return 4
+        return 0
+
+    @classmethod
     def from_array(self, array):
         return Equirect(array)
 
     def __init__(self, array):
-        assert len(array.shape) == 3
-        (height, width, depth) = array.shape
-        assert width == 2*height
-        assert depth == 4
+        assert Equirect.check(array) == 0
         assert sphaira.equirect_check(array) == 0
         self.array = array
 
