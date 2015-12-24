@@ -48,7 +48,7 @@ class Sphaira(pyglet.window.Window):
             v = Vector3([dy, -dx, 0])
             # update the current orientation
             self.orientation *= Quaternion.from_axis_rotation(
-                v.normalised,
+                -v.normalised,
                 v.length * 0.002
             )
         # zoom on right-drag
@@ -65,8 +65,7 @@ class Sphaira(pyglet.window.Window):
         gluPerspective(50, self.width / float(self.height), .01, 100)
         glMatrixMode(GL_MODELVIEW)
         glPushMatrix()
-        glTranslatef(0, 0, -7.0)
-        glScalef(self.zoom, self.zoom, self.zoom)
+        glTranslatef(0, 0, -0.9)
         m = self.orientation.matrix44
         array = (GLdouble * 16)()
         for i in xrange(4):
@@ -75,8 +74,6 @@ class Sphaira(pyglet.window.Window):
         glMultMatrixd(array)
         glPointSize(1.8)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
-        glEnable(GL_CULL_FACE)
-        glCullFace(GL_BACK)
         # draw stuff
         glColor3f(0.0, 0.5, 1.0)
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)
