@@ -29,6 +29,7 @@ class Equirect(object):
         assert Equirect.check(array) == 0
         assert sphaira.equirect_check(array) == 0
         self.array = array
+        self.resolution = int(2 * array.shape[1]**2)
 
     def sample(self, v):
         (t, u) = self._spherical_to_internal(v)

@@ -27,8 +27,9 @@ class CubeMap(object):
         return CubeMap(faces)
 
     @classmethod
-    def from_sphere(cls, sphere):
-        size = 1024
+    def from_sphere(cls, sphere, resolution=None):
+        resolution = resolution or sphere.resolution
+        size = int(np.sqrt(resolution / 6))
         faces = np.zeros((6, size, size, 4), dtype=np.float32)
         sphaira.cube_map_assign(faces, sphere.array, sphere.sampler)
         return CubeMap(faces)
@@ -37,3 +38,4 @@ class CubeMap(object):
         assert CubeMap.check(faces) == 0
         assert sphaira.cube_map_check(faces) == 0
         self.array = faces
+        self.resolution = int(6 * faces.shape[1]**2)
