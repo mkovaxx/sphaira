@@ -131,13 +131,13 @@ class Sphaira(pyglet.window.Window):
 
 def main():
     parser = argparse.ArgumentParser(
-        prog='sphaira',
-        description='Image sphere viewer and processor.',
+        prog='view',
+        description='Sphaira viewer for spherical data.',
     )
     parser.add_argument('input', help='INPUT')
     args = parser.parse_args()
     config = pyglet.gl.Config(sample_buffers=1, samples=4, double_buffer=True, depth_size=24)
-    window = Sphaira(caption='Sphaira', resizable=True, vsync=True, config=config)
+    window = Sphaira(caption='Sphaira Viewer', resizable=True, vsync=True, config=config)
     window.load_file(args.input)
     pyglet.clock.schedule_interval(window.update, (1.0/60))
     pyglet.app.run()
