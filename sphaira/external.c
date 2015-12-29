@@ -167,7 +167,7 @@ static struct PyModuleDef moduledef = {
     NULL
 };
 
-PyMODINIT_FUNC PyInit_sphaira(void)
+PyMODINIT_FUNC PyInit_external(void)
 {
     PyObject *m;
     m = PyModule_Create(&moduledef);
@@ -178,11 +178,11 @@ PyMODINIT_FUNC PyInit_sphaira(void)
     return m;
 }
 #else
-PyMODINIT_FUNC initsphaira(void)
+PyMODINIT_FUNC initexternal(void)
 {
     PyObject *m;
 
-    m = Py_InitModule("sphaira", SphairaFunctions);
+    m = Py_InitModule("external", SphairaFunctions);
     if (m == NULL) {
         return;
     }

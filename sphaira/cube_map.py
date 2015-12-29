@@ -1,7 +1,7 @@
 import numpy as np
 from pyrr import Vector3
 
-import lib.sphaira as sphaira
+import external
 
 
 class CubeMap(object):
@@ -31,11 +31,11 @@ class CubeMap(object):
         resolution = resolution or sphere.resolution
         size = int(np.sqrt(resolution / 6))
         faces = np.zeros((6, size, size, 4), dtype=np.float32)
-        sphaira.cube_map_assign(faces, sphere.array, sphere.sampler)
+        external.cube_map_assign(faces, sphere.array, sphere.sampler)
         return CubeMap(faces)
 
     def __init__(self, faces):
         assert CubeMap.check(faces) == 0
-        assert sphaira.cube_map_check(faces) == 0
+        assert external.cube_map_check(faces) == 0
         self.array = faces
         self.resolution = int(6 * faces.shape[1]**2)

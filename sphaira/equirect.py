@@ -1,12 +1,12 @@
 import numpy as np
 from pyrr import Vector3
 
-import lib.sphaira as sphaira
+import external
 
 
 class Equirect(object):
 
-    sampler = sphaira.equirect_get_sampler()
+    sampler = external.equirect_get_sampler()
 
     @classmethod
     def check(cls, array):
@@ -27,7 +27,7 @@ class Equirect(object):
 
     def __init__(self, array):
         assert Equirect.check(array) == 0
-        assert sphaira.equirect_check(array) == 0
+        assert external.equirect_check(array) == 0
         self.array = array
         self.resolution = int(2 * array.shape[1]**2)
 
