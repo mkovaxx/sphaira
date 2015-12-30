@@ -40,7 +40,7 @@ def main():
     args = parser.parse_args()
     sphere = load_sphere(args.input, projection=CubeMap)
     sphere2 = Equirect.from_sphere(sphere)
-    save_sphere(sphere, args.output)
+    save_sphere(sphere2, args.output)
 
 
 if __name__ == '__main__':

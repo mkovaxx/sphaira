@@ -11,6 +11,7 @@ static PyObject* equirect_check(PyObject* self, PyObject* args);
 static PyObject* cube_map_assign(PyObject* self, PyObject* args);
 static PyObject* equirect_assign(PyObject* self, PyObject* args);
 
+static PyObject* cube_map_get_sampler(PyObject* self, PyObject* args);
 static PyObject* equirect_get_sampler(PyObject* self, PyObject* args);
 
 static PyMethodDef SphairaFunctions[] = {
@@ -29,6 +30,9 @@ static PyMethodDef SphairaFunctions[] = {
   , "assign the equirectangular map from an image sphere"
   }
   /* sample */
+, { "cube_map_get_sampler", cube_map_get_sampler, METH_VARARGS
+  , "get the sampler for cube maps"
+  }
 , { "equirect_get_sampler", equirect_get_sampler, METH_VARARGS
   , "get the sampler for equirectangular projections"
   }
@@ -156,10 +160,10 @@ static PyObject* equirect_assign(PyObject* self, PyObject* args)
   for (y = 0; y < height; y++) {
     for (x = 0; x < width; x++) {
       phi = M_PI*(2.0*x / width - 1.0);
-      theta = M_PI*(y / height - 0.5);
-      v[0] = cos(theta)*cos(phi);
-      v[1] = cos(theta)*sin(phi);
-      v[2] = sin(theta);
+      theta = M_PI*((float)y / height);
+      v[0] = sin(theta)*cos(phi);
+      v[1] = sin(theta)*sin(phi);
+      v[2] = cos(theta);
       sampler(data_sphere, v, s);
       for (d = 0; d < 4; d++) {
         *(float*)(data + y*sy + x*sx + d*sd) = s[d];
@@ -167,6 +171,38 @@ static PyObject* equirect_assign(PyObject* self, PyObject* args)
     }
   }
   return Py_None;
+}
+
+static void cube_map_sample(PyArrayObject* cube_map, float* v, float* s) {
+  int size = PyArray_DIM(cube_map, 1);
+  int sf = PyArray_STRIDE(cube_map, 0);
+  int sy = PyArray_STRIDE(cube_map, 1);
+  int sx = PyArray_STRIDE(cube_map, 2);
+  int sd = PyArray_STRIDE(cube_map, 3);
+  int f;
+  float t;
+  float u;
+  float ax = fabs(v[0]);
+  float ay = fabs(v[1]);
+  float az = fabs(v[2]);
+  if (ax >= ay && ax >= az)  {
+    f = 0 | (v[0] < 0); t = -v[2] / v[0]; u = -v[1] / ax;
+  } else if (ay >= ax && ay >= az) {
+    f = 2 | (v[1] < 0); t = +v[0] / ay; u = +v[2] / v[1];
+  } else {
+    f = 4 | (v[2] < 0); t = +v[0] / v[2]; u = -v[1] / az;
+  }
+  int x = (0.5*t + 0.5)*(size - 1);
+  int y = (0.5*u + 0.5)*(size - 1);
+  int d;
+  void* data = PyArray_DATA(cube_map);
+  for (d = 0; d < 4; d++) {
+    s[d] = *(float*)(data + f*sf + y*sy + x*sx + d*sd);
+  }
+}
+
+static PyObject* cube_map_get_sampler(PyObject* self, PyObject* args) {
+  return PyCObject_FromVoidPtr(cube_map_sample, NULL);
 }
 
 static void equirect_sample(PyArrayObject* equirect, float* v, float* s) {

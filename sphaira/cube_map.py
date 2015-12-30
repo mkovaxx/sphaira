@@ -6,6 +6,8 @@ import external
 
 class CubeMap(object):
 
+    sampler = external.cube_map_get_sampler()
+
     @classmethod
     def check(cls, array):
         if array.dtype != np.float32:
