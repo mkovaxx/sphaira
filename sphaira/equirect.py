@@ -25,6 +25,15 @@ class Equirect(object):
     def from_array(self, array):
         return Equirect(array)
 
+    @classmethod
+    def from_sphere(cls, sphere, resolution=None):
+        resolution = resolution or sphere.resolution
+        height = int(np.sqrt(resolution / 2))
+        width = 2*height
+        faces = np.zeros((height, width, 4), dtype=np.float32)
+        external.equirect_assign(faces, sphere.array, sphere.sampler)
+        return Equirect(faces)
+
     def __init__(self, array):
         assert Equirect.check(array) == 0
         assert external.equirect_check(array) == 0

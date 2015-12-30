@@ -9,6 +9,7 @@ static PyObject* cube_map_check(PyObject* self, PyObject* args);
 static PyObject* equirect_check(PyObject* self, PyObject* args);
 
 static PyObject* cube_map_assign(PyObject* self, PyObject* args);
+static PyObject* equirect_assign(PyObject* self, PyObject* args);
 
 static PyObject* equirect_get_sampler(PyObject* self, PyObject* args);
 
@@ -23,6 +24,9 @@ static PyMethodDef SphairaFunctions[] = {
   /* assign */
 , { "cube_map_assign", cube_map_assign, METH_VARARGS
   , "assign the cube map from an image sphere"
+  }
+, { "equirect_assign", equirect_assign, METH_VARARGS
+  , "assign the equirectangular map from an image sphere"
   }
   /* sample */
 , { "equirect_get_sampler", equirect_get_sampler, METH_VARARGS
@@ -123,6 +127,42 @@ static PyObject* cube_map_assign(PyObject* self, PyObject* args)
         for (d = 0; d < 4; d++) {
           *(float*)(data + f*sf + y*sy + x*sx + d*sd) = s[d];
         }
+      }
+    }
+  }
+  return Py_None;
+}
+
+static PyObject* equirect_assign(PyObject* self, PyObject* args)
+{
+  PyArrayObject* equirect;
+  PyArrayObject* data_sphere;
+  PyObject* sampler_cobj;
+  if (!PyArg_ParseTuple(args, "OOO", &equirect, &data_sphere, &sampler_cobj)) {
+    return NULL;
+  }
+  Sampler sampler = PyCObject_AsVoidPtr(sampler_cobj);
+  int height = PyArray_DIM(equirect, 0);
+  int width = 2*height;
+  void* data = PyArray_DATA(equirect);
+  int sy = PyArray_STRIDE(equirect, 0);
+  int sx = PyArray_STRIDE(equirect, 1);
+  int sd = PyArray_STRIDE(equirect, 2);
+  int y, x, d;
+  float phi;
+  float theta;
+  float v[3];
+  float s[4];
+  for (y = 0; y < height; y++) {
+    for (x = 0; x < width; x++) {
+      phi = M_PI*(2.0*x / width - 1.0);
+      theta = M_PI*(y / height - 0.5);
+      v[0] = cos(theta)*cos(phi);
+      v[1] = cos(theta)*sin(phi);
+      v[2] = sin(theta);
+      sampler(data_sphere, v, s);
+      for (d = 0; d < 4; d++) {
+        *(float*)(data + y*sy + x*sx + d*sd) = s[d];
       }
     }
   }

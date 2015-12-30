@@ -39,7 +39,7 @@ def main():
     parser.add_argument('output', help='OUTPUT')
     args = parser.parse_args()
     sphere = load_sphere(args.input, projection=CubeMap)
-    # sphere2 = CubeMap.from_sphere(sphere)
+    sphere2 = Equirect.from_sphere(sphere)
     save_sphere(sphere, args.output)
 
 
