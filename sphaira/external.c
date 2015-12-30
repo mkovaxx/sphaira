@@ -185,12 +185,13 @@ static void cube_map_sample(PyArrayObject* cube_map, float* v, float* s) {
   float ax = fabs(v[0]);
   float ay = fabs(v[1]);
   float az = fabs(v[2]);
-  if (ax >= ay && ax >= az)  {
-    f = 0 | (v[0] < 0); t = -v[2] / v[0]; u = -v[1] / ax;
-  } else if (ay >= ax && ay >= az) {
-    f = 2 | (v[1] < 0); t = +v[0] / ay; u = +v[2] / v[1];
-  } else {
-    f = 4 | (v[2] < 0); t = +v[0] / v[2]; u = -v[1] / az;
+  switch ((ax > ay) | (ay > az) << 1 | (az > ax) << 2) {
+  case 1: case 3:
+    f = 0 | (v[0] < 0); t = -v[2] / v[0]; u = -v[1] / ax; break;
+  case 2: case 6:
+    f = 2 | (v[1] < 0); t = +v[0] / ay; u = +v[2] / v[1]; break;
+  case 4: case 5: case 0: case 7:
+    f = 4 | (v[2] < 0); t = +v[0] / v[2]; u = -v[1] / az; break;
   }
   int x = (0.5*t + 0.5)*(size - 1);
   int y = (0.5*u + 0.5)*(size - 1);
