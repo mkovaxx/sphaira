@@ -12,7 +12,7 @@ class Equirect(object):
     def check(cls, array):
         if array.dtype != np.float32:
             return 1
-        if len(array.shape) != 3:
+        if array.ndim != 3:
             return 2
         (height, width, depth) = array.shape
         if depth != 4:

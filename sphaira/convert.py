@@ -8,6 +8,12 @@ from equirect import Equirect
 def load_sphere(file_name, projection):
     image = Image.open(file_name).convert('RGBA')
     array = np.array(image, dtype=np.float32) / 255
+    if projection == CubeMap:
+        # decompose 3x2 mosaic into cube map faces
+        (pos, neg) = np.vsplit(array, 2)
+        (xp, yp, zp) = np.hsplit(pos, 3)
+        (xn, yn, zn) = np.hsplit(neg, 3)
+        array = np.stack([xp, xn, yp, yn, zp, zn])
     sphere = projection.from_array(array)
     return sphere
 
@@ -32,9 +38,9 @@ def main():
     parser.add_argument('input', help='INPUT')
     parser.add_argument('output', help='OUTPUT')
     args = parser.parse_args()
-    sphere = load_sphere(args.input, projection=Equirect)
-    sphere2 = CubeMap.from_sphere(sphere)
-    save_sphere(sphere2, args.output)
+    sphere = load_sphere(args.input, projection=CubeMap)
+    # sphere2 = CubeMap.from_sphere(sphere)
+    save_sphere(sphere, args.output)
 
 
 if __name__ == '__main__':
