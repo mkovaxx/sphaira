@@ -20,7 +20,13 @@ def convert_sphere(sphere, projection):
 def load_sphere(file_name, projection):
     image = Image.open(file_name).convert('RGBA')
     array = np.array(image, dtype=np.float32) / 255
-    if not projection:
+    if projection is not None:
+        if projection.check_image(array) != 0:
+            raise RuntimeError(
+                'The contents of %s are not in %s format.'
+                % (file_name, projection.__name__)
+            )
+    else:
         formats = detect_format(array)
         if len(formats) < 1:
             raise LookupError('Unknown format.')
