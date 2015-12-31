@@ -5,8 +5,7 @@ import pyglet
 from pyglet.gl import *
 from pyrr import Quaternion, Vector3, Matrix44
 
-from cube_map import CubeMap
-from equirect import Equirect
+import projection as proj
 from geom import SphericalMesh
 
 class Sphaira(pyglet.window.Window):
@@ -20,12 +19,14 @@ class Sphaira(pyglet.window.Window):
         self.mesh = SphericalMesh(4)
         self.cube_map = None
 
-    def load_file(self, file_name):
-        # the reverse direction: image = Image.fromarray(array)
-        image = Image.open(file_name).convert('RGBA')
-        array = np.array(image, dtype=np.float32) / 255
-        equirect = Equirect.from_array(array)
-        self.cube_map = CubeMap.from_sphere(equirect)
+    def load_file(self, file_name, in_format):
+        sphere = proj.load_sphere(file_name, projection=in_format)
+        in_format = sphere.__class__
+        out_format = proj.CubeMap
+        print('Loaded input %s from %s.' % (in_format.__name__, file_name))
+        sphere = proj.convert_sphere(sphere, out_format)
+        print('Converted %s to %s.' % (in_format.__name__, out_format.__name__))
+        self.cube_map = sphere
         self.send_cube_map_to_gl(self.cube_map)
 
     def update(self, dt):
@@ -134,11 +135,13 @@ def main():
         prog='view',
         description='Sphaira viewer for spherical data.',
     )
+    parser.add_argument('-i', '--in_format', help='IN_FORMAT')
     parser.add_argument('input', help='INPUT')
     args = parser.parse_args()
+    in_format = proj.get_format(args.in_format)
     config = pyglet.gl.Config(sample_buffers=1, samples=4, double_buffer=True, depth_size=24)
     window = Sphaira(caption='Sphaira Viewer', resizable=True, vsync=True, config=config)
-    window.load_file(args.input)
+    window.load_file(args.input, in_format)
     pyglet.clock.schedule_interval(window.update, (1.0/60))
     pyglet.app.run()
 

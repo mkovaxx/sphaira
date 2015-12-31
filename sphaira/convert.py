@@ -1,21 +1,5 @@
 import argparse
-import numpy as np
-from PIL import Image
-
-from cube_map import CubeMap
-from equirect import Equirect
-
-def load_sphere(file_name, projection):
-    image = Image.open(file_name).convert('RGBA')
-    array = np.array(image, dtype=np.float32) / 255
-    sphere = projection.from_image(array)
-    return sphere
-
-
-def save_sphere(sphere, file_name):
-    array = np.array(sphere.to_image() * 255, dtype=np.uint8)
-    image = Image.fromarray(array)
-    image.save(file_name)
+import projection as proj
 
 
 def main():
@@ -23,12 +7,20 @@ def main():
         prog='convert',
         description='Sphaira converter for spherical data.',
     )
+    parser.add_argument('-i', '--in_format', help='IN_FORMAT')
     parser.add_argument('input', help='INPUT')
+    parser.add_argument('-o', '--out_format', help='OUT_FORMAT', required=True)
     parser.add_argument('output', help='OUTPUT')
     args = parser.parse_args()
-    sphere = load_sphere(args.input, projection=CubeMap)
-    sphere2 = Equirect.from_sphere(sphere)
-    save_sphere(sphere2, args.output)
+    in_format = proj.get_format(args.in_format)
+    out_format = proj.get_format(args.out_format)
+    sphere = proj.load_sphere(args.input, projection=in_format)
+    in_format = sphere.__class__
+    print('Loaded input %s from %s.' % (in_format.__name__, args.input))
+    sphere = proj.convert_sphere(sphere, out_format)
+    print('Converted %s to %s.' % (in_format.__name__, out_format.__name__))
+    proj.save_sphere(args.output, sphere)
+    print('Saved output %s into %s.' % (out_format.__name__, args.output))
 
 
 if __name__ == '__main__':
