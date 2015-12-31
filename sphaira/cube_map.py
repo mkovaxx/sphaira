@@ -28,6 +28,22 @@ class CubeMap(object):
         return CubeMap(faces)
 
     @classmethod
+    def from_image(cls, image):
+        # decompose 3x2 mosaic into cube map faces
+        (pos, neg) = np.vsplit(image, 2)
+        (xp, yp, zp) = np.hsplit(pos, 3)
+        (xn, yn, zn) = np.hsplit(neg, 3)
+        array = np.stack([xp, xn, yp, yn, zp, zn])
+        return CubeMap(array)
+
+    def to_image(self):
+        # combine cube map faces into a 3x2 mosaic
+        return np.vstack([
+            np.hstack([self.array[0], self.array[2], self.array[4]]),
+            np.hstack([self.array[1], self.array[3], self.array[5]]),
+        ])
+
+    @classmethod
     def from_sphere(cls, sphere, resolution=None):
         resolution = resolution or sphere.resolution
         size = int(np.sqrt(resolution / 6))

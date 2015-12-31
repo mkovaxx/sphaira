@@ -22,8 +22,15 @@ class Equirect(object):
         return 0
 
     @classmethod
-    def from_array(self, array):
+    def from_array(cls, array):
         return Equirect(array)
+
+    @classmethod
+    def from_image(cls, image):
+        return Equirect(image)
+
+    def to_image(self):
+        return self.array
 
     @classmethod
     def from_sphere(cls, sphere, resolution=None):
