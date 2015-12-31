@@ -9,7 +9,7 @@ class Equirect(object):
     sampler = external.equirect_get_sampler()
 
     @classmethod
-    def check(cls, array):
+    def check_array(cls, array):
         if array.dtype != np.float32:
             return 1
         if array.ndim != 3:
@@ -22,12 +22,17 @@ class Equirect(object):
         return 0
 
     @classmethod
+    def check_image(cls, image):
+        return cls.check_array(image)
+
+    @classmethod
     def from_array(cls, array):
+        assert cls.check_array(array) == 0
         return Equirect(array)
 
     @classmethod
     def from_image(cls, image):
-        return Equirect(image)
+        return cls.from_array(image)
 
     def to_image(self):
         return self.array
@@ -42,7 +47,7 @@ class Equirect(object):
         return Equirect(faces)
 
     def __init__(self, array):
-        assert Equirect.check(array) == 0
+        # sanity check
         assert external.equirect_check(array) == 0
         self.array = array
         self.resolution = int(2 * array.shape[1]**2)
