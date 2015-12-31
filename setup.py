@@ -25,4 +25,13 @@ setup(
         'pyglet',
         'pyrr',
     ],
+    classifiers = [
+        'Development Status :: 3 - Alpha',
+        'Intended Audience :: End Users/Desktop',
+        'License :: OSI Approved :: BSD License',
+        'Natural Language :: English',
+        'Operating System :: POSIX',
+        'Programming Language :: Python :: 2.7',
+        'Topic :: Multimedia',
+    ],
 )
