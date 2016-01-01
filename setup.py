@@ -3,7 +3,7 @@ import numpy.distutils.misc_util
 
 setup(
     name = 'sphaira',
-    version = '0.1',
+    version = '0.1.1',
     description = 'Work with spherical images.',
     url = 'http://sphaira.org',
     author = 'Mate Kovacs',
@@ -12,6 +12,12 @@ setup(
     packages = [
         'sphaira',
     ],
+    entry_points = {
+        'console_scripts': [
+            'spconvert=sphaira.convert:main',
+            'spview=sphaira.view:main',
+        ]
+    },
     ext_modules = [
         Extension(
             'sphaira.external',
