@@ -7,6 +7,7 @@ from pyrr import Quaternion, Vector3, Matrix44
 
 import projection as proj
 from geom import SphericalMesh
+from glsl import Shader
 
 class Sphaira(pyglet.window.Window):
 
@@ -18,6 +19,7 @@ class Sphaira(pyglet.window.Window):
         self.zoom = 2.5
         self.mesh = SphericalMesh(4)
         self.cube_map = None
+        self.shader = Shader(vert=VERTEX_SHADER, frag=FRAGMENT_SHADER)
 
     def load_file(self, file_name, in_format):
         sphere = proj.load_sphere(file_name, projection=in_format)
@@ -76,8 +78,10 @@ class Sphaira(pyglet.window.Window):
         glPointSize(1.8)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
         # draw stuff
-        glColor3f(0.0, 0.5, 1.0)
-        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)
+        self.shader.bind()
+        glActiveTexture(GL_TEXTURE0 + self.texture_id[0])
+        glBindTexture(GL_TEXTURE_CUBE_MAP, self.texture_id[0])
+        self.shader.uniformi('cubeMap', self.texture_id[0])
         self.mesh.draw_triangles()
         glPopMatrix()
 
@@ -115,19 +119,28 @@ class Sphaira(pyglet.window.Window):
                 GL_RGBA, width, height, 0,
                 GL_RGBA, GL_FLOAT, data
             )
-        # set up texture coordinates
-        glEnable(GL_TEXTURE_GEN_S)
-        glEnable(GL_TEXTURE_GEN_T)
-        glEnable(GL_TEXTURE_GEN_R)
-        glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
-        glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
-        glTexGeni(GL_R, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR)
-        x_axis = (GLfloat * 4)(1.0, 0.0, 0.0, 0.0)
-        y_axis = (GLfloat * 4)(0.0, 1.0, 0.0, 0.0)
-        z_axis = (GLfloat * 4)(0.0, 0.0, 1.0, 0.0)
-        glTexGenfv(GL_S, GL_OBJECT_PLANE, x_axis)
-        glTexGenfv(GL_T, GL_OBJECT_PLANE, y_axis)
-        glTexGenfv(GL_R, GL_OBJECT_PLANE, z_axis)
+
+
+VERTEX_SHADER = '''
+#version 130
+attribute vec4 vert;
+varying vec3 texCoord;
+void main()
+{
+    gl_Position = gl_ModelViewProjectionMatrix * vert;
+    texCoord = vert.xyz;
+}
+'''
+
+FRAGMENT_SHADER = '''
+#version 130
+varying vec3 texCoord;
+uniform samplerCube cubeMap;
+void main()
+{
+    gl_FragColor = texture(cubeMap, texCoord);
+}
+'''
 
 
 def main():
