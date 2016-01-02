@@ -21,12 +21,9 @@ class Sphaira(pyglet.window.Window):
         self.cube_map = None
 
     def load_file(self, file_name, in_format):
-        sphere = proj.load_sphere(file_name, projection=in_format)
-        in_format = sphere.__class__
-        out_format = proj.CubeMap
+        self.sphere = proj.load_sphere(file_name, projection=in_format)
+        in_format = self.sphere.__class__
         print('Loaded input %s from %s.' % (in_format.__name__, file_name))
-        self.sphere = proj.convert_sphere(sphere, out_format)
-        print('Converted %s to %s.' % (in_format.__name__, out_format.__name__))
         self.texture_id = (GLuint * 1)()
         glGenTextures(1, self.texture_id)
         self.sphere.to_gl(self.texture_id[0])
