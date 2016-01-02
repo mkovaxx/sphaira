@@ -19,17 +19,24 @@ class Sphaira(pyglet.window.Window):
         self.zoom = 2.5
         self.mesh = SphericalMesh(4)
         self.cube_map = None
-        self.shader = Shader(vert=VERTEX_SHADER, frag=FRAGMENT_SHADER)
 
     def load_file(self, file_name, in_format):
         sphere = proj.load_sphere(file_name, projection=in_format)
         in_format = sphere.__class__
         out_format = proj.CubeMap
         print('Loaded input %s from %s.' % (in_format.__name__, file_name))
-        sphere = proj.convert_sphere(sphere, out_format)
+        self.sphere = proj.convert_sphere(sphere, out_format)
         print('Converted %s to %s.' % (in_format.__name__, out_format.__name__))
-        self.cube_map = sphere
-        self.send_cube_map_to_gl(self.cube_map)
+        self.texture_id = (GLuint * 1)()
+        glGenTextures(1, self.texture_id)
+        self.sphere.to_gl(self.texture_id[0])
+        self.shader = Shader(
+            vert=VERTEX_SHADER,
+            frag=[
+                FRAGMENT_SHADER,
+                self.sphere.get_glsl_sampler(),
+            ]
+        )
 
     def update(self, dt):
         self.t += dt
@@ -80,45 +87,9 @@ class Sphaira(pyglet.window.Window):
         # draw stuff
         self.shader.bind()
         glActiveTexture(GL_TEXTURE0 + self.texture_id[0])
-        glBindTexture(GL_TEXTURE_CUBE_MAP, self.texture_id[0])
-        self.shader.uniformi('cubeMap', self.texture_id[0])
+        self.sphere.bind_glsl_texture(self.texture_id[0], self.shader)
         self.mesh.draw_triangles()
         glPopMatrix()
-
-    def send_cube_map_to_gl(self, cube_map):
-        # enable cube map texturing
-        glEnable(GL_TEXTURE_CUBE_MAP)
-        # generate and bind texture
-        self.texture_id = (GLuint * 1)()
-        glGenTextures(1, self.texture_id)
-        glBindTexture(GL_TEXTURE_CUBE_MAP, self.texture_id[0])
-        # set up texturing parameters
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_GENERATE_MIPMAP, GL_FALSE)
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0)
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0)
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
-        # bind textures
-        cube_faces = (GLenum * 6)(
-            GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-            GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-            GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-            GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-            GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-            GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
-        )
-        (face_count, height, width, depth) = cube_map.array.shape
-        assert face_count == 6
-        for (face_index, cube_face) in enumerate(cube_faces):
-            data = cube_map.array[face_index].ctypes.data
-            glTexImage2D(
-                cube_face, 0,
-                GL_RGBA, width, height, 0,
-                GL_RGBA, GL_FLOAT, data
-            )
 
 
 VERTEX_SHADER = '''
@@ -135,10 +106,10 @@ void main()
 FRAGMENT_SHADER = '''
 #version 130
 varying vec3 texCoord;
-uniform samplerCube cubeMap;
+vec4 sample(vec3 v);
 void main()
 {
-    gl_FragColor = texture(cubeMap, texCoord);
+    gl_FragColor = sample(texCoord);
 }
 '''
 

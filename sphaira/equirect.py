@@ -1,4 +1,5 @@
 import numpy as np
+from pyglet.gl import *
 from pyrr import Vector3
 
 import external
