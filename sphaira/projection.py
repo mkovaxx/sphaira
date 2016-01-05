@@ -3,10 +3,12 @@ from PIL import Image
 
 from cube_map import CubeMap
 from equirect import Equirect
+from healpix import HealPix
 
 PROJECTION_BY_NAME = {projection.__name__: projection for projection in {
     CubeMap,
     Equirect,
+    HealPix,
 }}
 
 
