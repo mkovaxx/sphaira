@@ -1,5 +1,6 @@
 #include <Python.h>
 #include <numpy/arrayobject.h>
+#define _USE_MATH_DEFINES
 #include <math.h>
 
 
@@ -99,21 +100,20 @@ static PyObject* cube_map_assign(PyObject* self, PyObject* args)
   PyArrayObject* cube_map;
   PyArrayObject* data_sphere;
   PyObject* sampler_cobj;
+  Sampler sampler;
+  int size, sf, sy, sx, sd, f, y, x, d;
+  char* data;
+  float t, u, v[3], s[4];
   if (!PyArg_ParseTuple(args, "OOO", &cube_map, &data_sphere, &sampler_cobj)) {
     return NULL;
   }
-  Sampler sampler = PyCObject_AsVoidPtr(sampler_cobj);
-  int size = PyArray_DIM(cube_map, 1);
-  void* data = PyArray_DATA(cube_map);
-  int sf = PyArray_STRIDE(cube_map, 0);
-  int sy = PyArray_STRIDE(cube_map, 1);
-  int sx = PyArray_STRIDE(cube_map, 2);
-  int sd = PyArray_STRIDE(cube_map, 3);
-  int f, y, x, d;
-  float t;
-  float u;
-  float v[3];
-  float s[4];
+  sampler = PyCObject_AsVoidPtr(sampler_cobj);
+  size = PyArray_DIM(cube_map, 1);
+  data = PyArray_DATA(cube_map);
+  sf = PyArray_STRIDE(cube_map, 0);
+  sy = PyArray_STRIDE(cube_map, 1);
+  sx = PyArray_STRIDE(cube_map, 2);
+  sd = PyArray_STRIDE(cube_map, 3);
   for (f = 0; f < 6; f++) {
     for (y = 0; y < size; y++) {
       for (x = 0; x <  size; x++) {
@@ -142,21 +142,20 @@ static PyObject* equirect_assign(PyObject* self, PyObject* args)
   PyArrayObject* equirect;
   PyArrayObject* data_sphere;
   PyObject* sampler_cobj;
+  Sampler sampler;
+  int height, width, sy, sx, sd, y, x, d;
+  char* data;
+  float phi, theta, v[3], s[4];
   if (!PyArg_ParseTuple(args, "OOO", &equirect, &data_sphere, &sampler_cobj)) {
     return NULL;
   }
-  Sampler sampler = PyCObject_AsVoidPtr(sampler_cobj);
-  int height = PyArray_DIM(equirect, 0);
-  int width = 2*height;
-  void* data = PyArray_DATA(equirect);
-  int sy = PyArray_STRIDE(equirect, 0);
-  int sx = PyArray_STRIDE(equirect, 1);
-  int sd = PyArray_STRIDE(equirect, 2);
-  int y, x, d;
-  float phi;
-  float theta;
-  float v[3];
-  float s[4];
+  sampler = PyCObject_AsVoidPtr(sampler_cobj);
+  height = PyArray_DIM(equirect, 0);
+  width = 2*height;
+  data = PyArray_DATA(equirect);
+  sy = PyArray_STRIDE(equirect, 0);
+  sx = PyArray_STRIDE(equirect, 1);
+  sd = PyArray_STRIDE(equirect, 2);
   for (y = 0; y < height; y++) {
     for (x = 0; x < width; x++) {
       phi = M_PI*(2.0*x / width - 1.0);
@@ -174,17 +173,17 @@ static PyObject* equirect_assign(PyObject* self, PyObject* args)
 }
 
 static void cube_map_sample(PyArrayObject* cube_map, float* v, float* s) {
-  int size = PyArray_DIM(cube_map, 1);
-  int sf = PyArray_STRIDE(cube_map, 0);
-  int sy = PyArray_STRIDE(cube_map, 1);
-  int sx = PyArray_STRIDE(cube_map, 2);
-  int sd = PyArray_STRIDE(cube_map, 3);
-  int f;
-  float t;
-  float u;
-  float ax = fabs(v[0]);
-  float ay = fabs(v[1]);
-  float az = fabs(v[2]);
+  int size, sf, sy, sx, sd, f, y, x, d;
+  char* data;
+  float t, u, ax, ay, az;
+  size = PyArray_DIM(cube_map, 1);
+  sf = PyArray_STRIDE(cube_map, 0);
+  sy = PyArray_STRIDE(cube_map, 1);
+  sx = PyArray_STRIDE(cube_map, 2);
+  sd = PyArray_STRIDE(cube_map, 3);
+  ax = fabs(v[0]);
+  ay = fabs(v[1]);
+  az = fabs(v[2]);
   switch ((ax > ay) | (ay > az) << 1 | (az > ax) << 2) {
   case 1: case 3:
     f = 0 | (v[0] < 0); t = -v[2] / v[0]; u = -v[1] / ax; break;
@@ -193,10 +192,9 @@ static void cube_map_sample(PyArrayObject* cube_map, float* v, float* s) {
   case 4: case 5: case 0: case 7:
     f = 4 | (v[2] < 0); t = +v[0] / v[2]; u = -v[1] / az; break;
   }
-  int x = (0.5*t + 0.5)*(size - 1);
-  int y = (0.5*u + 0.5)*(size - 1);
-  int d;
-  void* data = PyArray_DATA(cube_map);
+  x = (0.5*t + 0.5)*(size - 1);
+  y = (0.5*u + 0.5)*(size - 1);
+  data = PyArray_DATA(cube_map);
   for (d = 0; d < 4; d++) {
     s[d] = *(float*)(data + f*sf + y*sy + x*sx + d*sd);
   }
@@ -207,20 +205,22 @@ static PyObject* cube_map_get_sampler(PyObject* self, PyObject* args) {
 }
 
 static void equirect_sample(PyArrayObject* equirect, float* v, float* s) {
-  int height = PyArray_DIM(equirect, 0);
-  int width = PyArray_DIM(equirect, 1);
-  int sy = PyArray_STRIDE(equirect, 0);
-  int sx = PyArray_STRIDE(equirect, 1);
-  int sd = PyArray_STRIDE(equirect, 2);
-  float phi = atan2(v[1], v[0]);
-  float r = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
-  float theta = acos(v[2] / r);
-  float t = phi/(2*M_PI) + 0.5;
-  float u = theta/M_PI;
-  int x = t*(width - 1);
-  int y = u*(height - 1);
-  int d;
-  void* data = PyArray_DATA(equirect);
+  int width, height, sy, sx, sd, y, x, d;
+  char* data;
+  float phi, r, theta, t, u;
+  height = PyArray_DIM(equirect, 0);
+  width = PyArray_DIM(equirect, 1);
+  sy = PyArray_STRIDE(equirect, 0);
+  sx = PyArray_STRIDE(equirect, 1);
+  sd = PyArray_STRIDE(equirect, 2);
+  phi = atan2(v[1], v[0]);
+  r = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+  theta = acos(v[2] / r);
+  t = phi/(2*M_PI) + 0.5;
+  u = theta/M_PI;
+  x = t*(width - 1);
+  y = u*(height - 1);
+  data = PyArray_DATA(equirect);
   for (d = 0; d < 4; d++) {
     s[d] = *(float*)(data + y*sy + x*sx + d*sd);
   }
