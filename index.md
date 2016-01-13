@@ -9,23 +9,21 @@ args: none
 
 ## Install
 
-```
 pip install sphaira
-```
 
 ## Tools
 
-* ```spconvert```
-* ```spview```
+* spconvert
+* spview
 
 ## Supported projections
 
-* ```Equirect```
-* ```CubeMap```
+* Equirect
+* CubeMap
 
 ## Planned Features
 
-* OpenEXR support
-* ```HealPix``` projection
-* ```spdraw``` tool
+* HealPix projection
+* spdraw tool
 * filtering
+* OpenEXR support
