@@ -20,10 +20,3 @@ pip install sphaira
 
 * Equirect
 * CubeMap
-
-## Planned Features
-
-* HealPix projection
-* spdraw tool
-* filtering
-* OpenEXR support
