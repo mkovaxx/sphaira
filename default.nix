@@ -5,6 +5,7 @@ with import <nixpkgs> {}; {
       pythonPackages.numpy
       pythonPackages.pillow
       pythonPackages.pyglet
+      pythonPackages.pyopengl
       pythonPackages.pyrr
       pythonPackages.pyside
     ];

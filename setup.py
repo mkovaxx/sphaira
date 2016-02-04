@@ -29,7 +29,9 @@ setup(
         'numpy',
         'pillow',
         'pyglet',
+        'pyopengl',
         'pyrr',
+        'pyside',
     ],
     classifiers = [
         'Development Status :: 3 - Alpha',

@@ -4,6 +4,9 @@ from PIL import Image
 import pyglet
 from pyglet.gl import *
 from pyrr import Quaternion, Vector3, Matrix44
+from PySide.QtGui import QMainWindow, QApplication
+from PySide.QtOpenGL import QGLWidget
+from OpenGL import GL
 
 import projection as proj
 from geom import SphericalMesh
