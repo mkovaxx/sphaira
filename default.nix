@@ -4,7 +4,6 @@ with import <nixpkgs> {}; {
     buildInputs = [
       pythonPackages.numpy
       pythonPackages.pillow
-      pythonPackages.pyglet
       pythonPackages.pyopengl
       pythonPackages.pyrr
       pythonPackages.pyside
