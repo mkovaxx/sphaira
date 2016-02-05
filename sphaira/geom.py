@@ -1,4 +1,6 @@
 import copy
+import numpy as np
+from OpenGL.arrays import vbo
 from OpenGL.GL import *
 from pyrr import Vector3
 
@@ -12,30 +14,21 @@ class SphericalMesh(object):
         self.indices = []
         for abc in seed.triangles:
             self.indices.extend(abc)
-        self.vertex_list = []
-        # pyglet.graphics.vertex_list_indexed(
-        #     len(self.vertices),
-        #     self.indices,
-        #     ('v3d/static', [
-        #         coord
-        #         for vector in self.vertices
-        #         for coord in vector.normalised
-        #     ]),
-        # )
+        for i in xrange(len(self.vertices)):
+            self.vertices[i].normalise()
+        vertex_array = np.array(self.vertices, dtype=np.float32)
+        self.vertex_buffer = vbo.VBO(vertex_array)
+        index_array = np.array(self.indices, dtype=np.int32)
+        self.index_buffer = vbo.VBO(index_array, target=GL_ELEMENT_ARRAY_BUFFER)
+        self.index_count = len(self.indices)
 
     def draw_triangles(self):
-        # self.vertex_list.draw(gl.GL_TRIANGLES)
-        glBegin(GL_LINE_STRIP)
-        glColor3f(1, 1, 1)
-        glVertex3f(-1, -1, -1)
-        glVertex3f(+1, -1, -1)
-        glVertex3f(+1, +1, -1)
-        glVertex3f(-1, +1, -1)
-        glVertex3f(-1, +1, +1)
-        glVertex3f(+1, +1, +1)
-        glVertex3f(+1, -1, +1)
-        glVertex3f(-1, -1, +1)
-        glEnd()
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+        self.vertex_buffer.bind()
+        self.index_buffer.bind()
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+        glDrawElements(GL_TRIANGLES, self.index_count, GL_UNSIGNED_INT, None)
 
 
 class TriangleMesh(object):
