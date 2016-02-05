@@ -1,6 +1,6 @@
 # Based on code by Tristam Macdonald.
 
-from pyglet.gl import *
+from OpenGL.GL import *
 from ctypes import *
 
 class Shader:
@@ -22,19 +22,11 @@ class Shader:
         # attempt to link the program
         self.link()
 
-    def createShader(self, strings, type):
-        count = len(strings)
-        # if we have no source code, ignore this shader
-        if count < 1:
-            return
-
+    def createShader(self, source, type):
         # create the shader handle
         shader = glCreateShader(type)
 
-        # convert the source strings into a ctypes pointer-to-char array, and upload them
-        # this is deep, dark, dangerous black magick - don't try stuff like this at home!
-        src = (c_char_p * count)(*strings)
-        glShaderSource(shader, count, cast(pointer(src), POINTER(POINTER(c_char))), None)
+        glShaderSource(shader, source)
 
         # compile the shader
         glCompileShader(shader)

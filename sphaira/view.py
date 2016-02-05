@@ -1,35 +1,35 @@
 import argparse
+from ctypes import *
 import numpy as np
+from OpenGL.GL import *
+from OpenGL.GLU import gluPerspective
 from PIL import Image
-import pyglet
-from pyglet.gl import *
 from pyrr import Quaternion, Vector3, Matrix44
+from PySide import QtCore
 from PySide.QtGui import QMainWindow, QApplication
 from PySide.QtOpenGL import QGLWidget
-from OpenGL import GL
 
 import projection as proj
 from geom import SphericalMesh
 from glsl import Shader
 
-class Sphaira(pyglet.window.Window):
+class SphairaView(QGLWidget):
 
     def __init__(self, **kwargs):
-        super(Sphaira, self).__init__(**kwargs)
-        self.maximize()
-        self.t = 0.0
+        super(SphairaView, self).__init__(**kwargs)
         self.orientation = Quaternion()
-        self.zoom = 2.5
         self.mesh = SphericalMesh(4)
-        self.cube_map = None
+        self.old_pos = QtCore.QPoint(0, 0)
+        self.setMouseTracking(True)
 
     def load_file(self, file_name, in_format):
         self.sphere = proj.load_sphere(file_name, projection=in_format)
         in_format = self.sphere.__class__
         print('Loaded input %s from %s.' % (in_format.__name__, file_name))
         self.texture_id = (GLuint * 1)()
-        glGenTextures(1, self.texture_id)
+        self.texture_id = [glGenTextures(1)]
         self.sphere.to_gl(self.texture_id[0])
+        print 1
         self.shader = Shader(
             vert=VERTEX_SHADER,
             frag=[
@@ -38,21 +38,22 @@ class Sphaira(pyglet.window.Window):
             ]
         )
 
-    def update(self, dt):
-        self.t += dt
+    def initializeGL(self):
+        pass
 
-    def on_mouse_press(self, x, y, button, modifiers):
-        # self.set_exclusive_mouse()
-        return
+    def resizeGL(self, w, h):
+        glViewport(0, 0, w, h)
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        gluPerspective(50, w / h, .01, 100)
 
-    def on_mouse_release(self, x, y, button, modifiers):
-        # self.set_exclusive_mouse(exclusive=False)
-        return
-
-    def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+    def mouseMoveEvent(self, event):
+        pos = event.pos()
         # rotate on left-drag
-        if buttons & 1:
+        if event.buttons() & QtCore.Qt.LeftButton > 0:
             # the rotation vector is the displacement vector rotated by 90 degrees
+            dx = pos.x() - self.old_pos.x()
+            dy = pos.y() - self.old_pos.y()
             if dx == 0 and dy == 0:
                 return
             v = Vector3([dy, -dx, 0])
@@ -61,21 +62,17 @@ class Sphaira(pyglet.window.Window):
                 -v.normalised,
                 v.length * 0.002
             )
-        # zoom on right-drag
-        if buttons & 4:
-            self.zoom += self.zoom * dy*0.01
+        self.old_pos = pos
+        self.update()
 
-    def on_draw(self):
-        glViewport(0, 0, self.width, self.height)
-        self.clear()
+    def paintGL(self):
+        glClearColor(0, 0, 0, 1);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glEnable(GL_DEPTH_TEST)
         glDepthFunc(GL_LESS)
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        gluPerspective(50, self.width / float(self.height), .01, 100)
         glMatrixMode(GL_MODELVIEW)
-        glPushMatrix()
-        glTranslatef(0, 0, -0.9)
+        glLoadIdentity()
+        glTranslatef(0, 0, -3.9)
         m = self.orientation.matrix44
         array = (GLdouble * 16)()
         for i in xrange(4):
@@ -89,7 +86,6 @@ class Sphaira(pyglet.window.Window):
         glActiveTexture(GL_TEXTURE0 + self.texture_id[0])
         self.sphere.bind_glsl_texture(self.texture_id[0], self.shader)
         self.mesh.draw_triangles()
-        glPopMatrix()
 
 
 VERTEX_SHADER = '''
@@ -109,9 +105,24 @@ varying vec3 texCoord;
 vec4 sample(vec3 v);
 void main()
 {
-    gl_FragColor = sample(texCoord);
+    gl_FragColor = vec4(1, 1, 1, 1); //sample(texCoord);
 }
 '''
+
+
+class SphairaApp(QApplication):
+
+    def __init__(self, args):
+        super(SphairaApp, self).__init__(args)
+        self.setApplicationName("Sphaira Viewer")
+        self.mainWindow = QMainWindow()
+        self.gl_widget = SphairaView()
+        self.mainWindow.setCentralWidget(self.gl_widget)
+        self.mainWindow.resize(1024, 768)
+        self.mainWindow.show()
+
+    def load_file(self, file_name, in_format):
+        return self.gl_widget.load_file(file_name, in_format)
 
 
 def main():
@@ -121,13 +132,12 @@ def main():
     )
     parser.add_argument('-i', '--in_format', help='IN_FORMAT')
     parser.add_argument('input', help='INPUT')
-    args = parser.parse_args()
+    (args, leftover) = parser.parse_known_args()
     in_format = proj.get_format(args.in_format)
-    config = pyglet.gl.Config(sample_buffers=1, samples=4, double_buffer=True, depth_size=24)
-    window = Sphaira(caption='Sphaira Viewer', resizable=True, vsync=True, config=config)
-    window.load_file(args.input, in_format)
-    pyglet.clock.schedule_interval(window.update, (1.0/60))
-    pyglet.app.run()
+    app = SphairaApp(leftover)
+    app.load_file(args.input, in_format)
+    app.exec_()
+
 
 if __name__ == '__main__':
     main()

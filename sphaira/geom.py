@@ -1,6 +1,5 @@
 import copy
-import pyglet
-from pyglet.gl import *
+from OpenGL.GL import *
 from pyrr import Vector3
 
 class SphericalMesh(object):
@@ -13,18 +12,30 @@ class SphericalMesh(object):
         self.indices = []
         for abc in seed.triangles:
             self.indices.extend(abc)
-        self.vertex_list = pyglet.graphics.vertex_list_indexed(
-            len(self.vertices),
-            self.indices,
-            ('v3d/static', [
-                coord
-                for vector in self.vertices
-                for coord in vector.normalised
-            ]),
-        )
+        self.vertex_list = []
+        # pyglet.graphics.vertex_list_indexed(
+        #     len(self.vertices),
+        #     self.indices,
+        #     ('v3d/static', [
+        #         coord
+        #         for vector in self.vertices
+        #         for coord in vector.normalised
+        #     ]),
+        # )
 
     def draw_triangles(self):
-        self.vertex_list.draw(gl.GL_TRIANGLES)
+        # self.vertex_list.draw(gl.GL_TRIANGLES)
+        glBegin(GL_LINE_STRIP)
+        glColor3f(1, 1, 1)
+        glVertex3f(-1, -1, -1)
+        glVertex3f(+1, -1, -1)
+        glVertex3f(+1, +1, -1)
+        glVertex3f(-1, +1, -1)
+        glVertex3f(-1, +1, +1)
+        glVertex3f(+1, +1, +1)
+        glVertex3f(+1, -1, +1)
+        glVertex3f(-1, -1, +1)
+        glEnd()
 
 
 class TriangleMesh(object):

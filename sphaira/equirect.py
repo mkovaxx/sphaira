@@ -1,5 +1,5 @@
 import numpy as np
-from pyglet.gl import *
+from OpenGL.GL import *
 from pyrr import Vector3
 
 import external
@@ -53,11 +53,13 @@ class Equirect(object):
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
         (height, width, depth) = self.array.shape
         data = self.array.ctypes.data
+        print 1
         glTexImage2D(
-            GL_TEXTURE_2D, 0,
-            GL_RGBA, width, height, 0,
-            GL_RGBA, GL_FLOAT, data
+            GL_TEXTURE_2D, 0, 4,
+            128, 128, 0,
+            GL_RGBA, GL_FLOAT, data,
         )
+        print 2
 
     def get_glsl_sampler(self):
         return '''
