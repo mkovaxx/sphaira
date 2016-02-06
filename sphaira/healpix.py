@@ -72,11 +72,10 @@ class HealPix(object):
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
         (faces, height, width, depth) = self.array.shape
-        data = self.array.ctypes.data
         glTexImage3D(
-            GL_TEXTURE_2D_ARRAY, 0,
-            GL_RGBA, width, height, 12, 0,
-            GL_RGBA, GL_FLOAT, data,
+            GL_TEXTURE_2D_ARRAY, 0, 4,
+            width, height, 12, 0,
+            GL_RGBA, GL_FLOAT, self.array,
         )
 
     def get_glsl_sampler(self):

@@ -26,10 +26,8 @@ class SphairaView(QGLWidget):
         self.sphere = proj.load_sphere(file_name, projection=in_format)
         in_format = self.sphere.__class__
         print('Loaded input %s from %s.' % (in_format.__name__, file_name))
-        self.texture_id = (GLuint * 1)()
-        self.texture_id = [glGenTextures(1)]
-        self.sphere.to_gl(self.texture_id[0])
-        print 1
+        self.texture_id = glGenTextures(1)
+        self.sphere.to_gl(self.texture_id)
         self.shader = Shader(
             vert=VERTEX_SHADER,
             frag=[
@@ -45,7 +43,7 @@ class SphairaView(QGLWidget):
         glViewport(0, 0, w, h)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        gluPerspective(50, w / h, .01, 100)
+        gluPerspective(50, float(w) / h, .01, 100)
 
     def mouseMoveEvent(self, event):
         pos = event.pos()
@@ -56,7 +54,7 @@ class SphairaView(QGLWidget):
             dy = pos.y() - self.old_pos.y()
             if dx == 0 and dy == 0:
                 return
-            v = Vector3([dy, -dx, 0])
+            v = Vector3([dy, dx, 0])
             # update the current orientation
             self.orientation *= Quaternion.from_axis_rotation(
                 -v.normalised,
@@ -72,7 +70,7 @@ class SphairaView(QGLWidget):
         glDepthFunc(GL_LESS)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
-        glTranslatef(0, 0, -3.9)
+        glTranslatef(0, 0, -2.9)
         m = self.orientation.matrix44
         array = (GLdouble * 16)()
         for i in xrange(4):
@@ -83,8 +81,8 @@ class SphairaView(QGLWidget):
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
         # draw stuff
         self.shader.bind()
-        glActiveTexture(GL_TEXTURE0 + self.texture_id[0])
-        self.sphere.bind_glsl_texture(self.texture_id[0], self.shader)
+        glActiveTexture(GL_TEXTURE0 + self.texture_id)
+        self.sphere.bind_glsl_texture(self.texture_id, self.shader)
         self.mesh.draw_triangles()
 
 
@@ -105,7 +103,7 @@ varying vec3 texCoord;
 vec4 sample(vec3 v);
 void main()
 {
-    gl_FragColor = vec4(1, 1, 1, 1); //sample(texCoord);
+    gl_FragColor = sample(texCoord);
 }
 '''
 
@@ -114,12 +112,14 @@ class SphairaApp(QApplication):
 
     def __init__(self, args):
         super(SphairaApp, self).__init__(args)
-        self.setApplicationName("Sphaira Viewer")
-        self.mainWindow = QMainWindow()
+        name = 'Sphaira Viewer'
+        self.setApplicationName(name)
         self.gl_widget = SphairaView()
+        self.mainWindow = QMainWindow()
+        self.mainWindow.setWindowTitle(name)
         self.mainWindow.setCentralWidget(self.gl_widget)
-        self.mainWindow.resize(1024, 768)
-        self.mainWindow.show()
+        self.mainWindow.resize(800, 600)
+        self.mainWindow.showMaximized()
 
     def load_file(self, file_name, in_format):
         return self.gl_widget.load_file(file_name, in_format)

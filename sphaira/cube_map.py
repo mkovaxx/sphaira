@@ -84,11 +84,10 @@ class CubeMap(object):
         )
         (face_count, height, width, depth) = self.array.shape
         for (face_index, cube_face) in enumerate(cube_faces):
-            data = self.array[face_index].ctypes.data
             glTexImage2D(
-                cube_face, 0,
-                GL_RGBA, width, height, 0,
-                GL_RGBA, GL_FLOAT, data
+                cube_face, 0, 4,
+                width, height, 0,
+                GL_RGBA, GL_FLOAT, self.array[face_index],
             )
 
     def get_glsl_sampler(self):

@@ -23,7 +23,6 @@ class SphericalMesh(object):
         self.index_count = len(self.indices)
 
     def draw_triangles(self):
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
         self.vertex_buffer.bind()
         self.index_buffer.bind()
         glEnableVertexAttribArray(0);

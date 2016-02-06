@@ -52,14 +52,11 @@ class Equirect(object):
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
         (height, width, depth) = self.array.shape
-        data = self.array.ctypes.data
-        print 1
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
         glTexImage2D(
             GL_TEXTURE_2D, 0, 4,
-            128, 128, 0,
-            GL_RGBA, GL_FLOAT, data,
+            width, height, 0, GL_RGBA, GL_FLOAT, self.array,
         )
-        print 2
 
     def get_glsl_sampler(self):
         return '''
