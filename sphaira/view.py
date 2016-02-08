@@ -30,10 +30,7 @@ class SphairaView(QGLWidget):
         self.sphere.to_gl(self.texture_id)
         self.shader = Shader(
             vert=VERTEX_SHADER,
-            frag=[
-                FRAGMENT_SHADER,
-                self.sphere.get_glsl_sampler(),
-            ]
+            frag=FRAGMENT_SHADER + self.sphere.get_glsl_sampler(),
         )
 
     def initializeGL(self):
