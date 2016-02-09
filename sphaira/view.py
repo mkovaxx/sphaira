@@ -61,6 +61,12 @@ class SphairaView(QGLWidget):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glEnable(GL_DEPTH_TEST)
         glDepthFunc(GL_LEQUAL)
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        glEnable(GL_CULL_FACE)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+        glFrontFace(GL_CCW)
+        glCullFace(GL_BACK)
         for layer in self.layers:
             glMatrixMode(GL_MODELVIEW)
             glLoadIdentity()
@@ -71,8 +77,6 @@ class SphairaView(QGLWidget):
                 for j in xrange(4):
                     array[4*i + j] = m[i,j]
             glMultMatrixd(array)
-            glPointSize(1.8)
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
             # draw stuff
             layer.shader.bind()
             glActiveTexture(GL_TEXTURE0 + layer.texture_id)
@@ -103,11 +107,12 @@ def main():
         description='Sphaira viewer for spherical data.',
     )
     parser.add_argument('-i', '--in_format', help='IN_FORMAT')
-    parser.add_argument('input', help='INPUT')
+    parser.add_argument('input', nargs='+', help='INPUT')
     (args, leftover) = parser.parse_known_args()
     in_format = proj.get_format(args.in_format)
     app = SphairaApp(leftover)
-    app.load_file(args.input, in_format)
+    for filename in args.input:
+        app.load_file(filename, in_format)
     app.exec_()
 
 

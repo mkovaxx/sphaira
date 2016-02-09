@@ -39,5 +39,6 @@ vec4 sample(vec3 v);
 void main()
 {
     gl_FragColor = sample(texCoord);
+    gl_FragColor.a = 0.5;
 }
 '''
