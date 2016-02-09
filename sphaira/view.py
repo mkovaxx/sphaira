@@ -12,6 +12,7 @@ from PySide.QtOpenGL import QGLWidget
 import projection as proj
 from geom import SphericalMesh
 from glsl import Shader
+from layer import Layer
 
 class SphairaView(QGLWidget):
 
@@ -21,17 +22,12 @@ class SphairaView(QGLWidget):
         self.mesh = SphericalMesh(4)
         self.old_pos = QtCore.QPoint(0, 0)
         self.setMouseTracking(True)
+        self.layers = []
 
-    def load_file(self, file_name, in_format):
-        self.sphere = proj.load_sphere(file_name, projection=in_format)
-        in_format = self.sphere.__class__
-        print('Loaded input %s from %s.' % (in_format.__name__, file_name))
-        self.texture_id = glGenTextures(1)
-        self.sphere.to_gl(self.texture_id)
-        self.shader = Shader(
-            vert=VERTEX_SHADER,
-            frag=FRAGMENT_SHADER + self.sphere.get_glsl_sampler(),
-        )
+    def load_file(self, filename, in_format):
+        layer = Layer()
+        layer.load_file(filename, in_format)
+        self.layers.append(layer)
 
     def initializeGL(self):
         pass
@@ -64,45 +60,24 @@ class SphairaView(QGLWidget):
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glEnable(GL_DEPTH_TEST)
-        glDepthFunc(GL_LESS)
-        glMatrixMode(GL_MODELVIEW)
-        glLoadIdentity()
-        glTranslatef(0, 0, -2.9)
-        m = self.orientation.matrix44
-        array = (GLdouble * 16)()
-        for i in xrange(4):
-            for j in xrange(4):
-                array[4*i + j] = m[i,j]
-        glMultMatrixd(array)
-        glPointSize(1.8)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
-        # draw stuff
-        self.shader.bind()
-        glActiveTexture(GL_TEXTURE0 + self.texture_id)
-        self.sphere.bind_glsl_texture(self.texture_id, self.shader)
-        self.mesh.draw_triangles()
-
-
-VERTEX_SHADER = '''
-#version 130
-attribute vec4 vert;
-varying vec3 texCoord;
-void main()
-{
-    gl_Position = gl_ModelViewProjectionMatrix * vert;
-    texCoord = vert.xyz;
-}
-'''
-
-FRAGMENT_SHADER = '''
-#version 130
-varying vec3 texCoord;
-vec4 sample(vec3 v);
-void main()
-{
-    gl_FragColor = sample(texCoord);
-}
-'''
+        glDepthFunc(GL_LEQUAL)
+        for layer in self.layers:
+            glMatrixMode(GL_MODELVIEW)
+            glLoadIdentity()
+            glTranslatef(0, 0, -2.9)
+            m = self.orientation.matrix44
+            array = (GLdouble * 16)()
+            for i in xrange(4):
+                for j in xrange(4):
+                    array[4*i + j] = m[i,j]
+            glMultMatrixd(array)
+            glPointSize(1.8)
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+            # draw stuff
+            layer.shader.bind()
+            glActiveTexture(GL_TEXTURE0 + layer.texture_id)
+            layer.sphere.bind_glsl_texture(layer.texture_id, layer.shader)
+            self.mesh.draw_triangles()
 
 
 class SphairaApp(QApplication):
