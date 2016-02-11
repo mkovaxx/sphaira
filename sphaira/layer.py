@@ -1,12 +1,14 @@
 from OpenGL.GL import *
+from PySide.QtGui import QListWidgetItem
 
 import projection as proj
 from glsl import Shader
 
-class Layer(object):
+class Layer(QListWidgetItem):
 
     def __init__(self):
-        pass
+        super(Layer, self).__init__()
+        self.setText('<empty>')
 
     def load_file(self, file_name, in_format):
         self.sphere = proj.load_sphere(file_name, projection=in_format)
@@ -18,6 +20,7 @@ class Layer(object):
             vert=VERTEX_SHADER,
             frag=FRAGMENT_SHADER + self.sphere.get_glsl_sampler(),
         )
+        self.setText(file_name)
 
 
 VERTEX_SHADER = '''

@@ -6,7 +6,7 @@ from OpenGL.GLU import gluPerspective
 from PIL import Image
 from pyrr import Quaternion, Vector3, Matrix44
 from PySide import QtCore
-from PySide.QtGui import QMainWindow, QApplication
+from PySide.QtGui import QMainWindow, QApplication, QDockWidget, QListWidget
 from PySide.QtOpenGL import QGLWidget
 
 import projection as proj
@@ -16,18 +16,18 @@ from layer import Layer
 
 class SphairaView(QGLWidget):
 
-    def __init__(self, **kwargs):
-        super(SphairaView, self).__init__(**kwargs)
+    def __init__(self, layers):
+        super(SphairaView, self).__init__()
         self.orientation = Quaternion()
         self.mesh = SphericalMesh(4)
         self.old_pos = QtCore.QPoint(0, 0)
         self.setMouseTracking(True)
-        self.layers = []
+        self.layers = layers
 
     def load_file(self, filename, in_format):
         layer = Layer()
         layer.load_file(filename, in_format)
-        self.layers.append(layer)
+        self.layers.addItem(layer)
 
     def initializeGL(self):
         pass
@@ -67,7 +67,8 @@ class SphairaView(QGLWidget):
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
         glFrontFace(GL_CCW)
         glCullFace(GL_BACK)
-        for layer in self.layers:
+        for i in xrange(self.layers.count()):
+            layer = self.layers.item(i)
             glMatrixMode(GL_MODELVIEW)
             glLoadIdentity()
             glTranslatef(0, 0, -2.9)
@@ -90,10 +91,21 @@ class SphairaApp(QApplication):
         super(SphairaApp, self).__init__(args)
         name = 'Sphaira Viewer'
         self.setApplicationName(name)
-        self.gl_widget = SphairaView()
+        self.layer_list = QDockWidget('Layers')
+        self.layer_list.setFeatures(
+            QDockWidget.DockWidgetMovable |
+            QDockWidget.DockWidgetFloatable
+        )
+        list_widget = QListWidget()
+        self.layer_list.setWidget(list_widget)
+        self.gl_widget = SphairaView(list_widget)
         self.mainWindow = QMainWindow()
         self.mainWindow.setWindowTitle(name)
         self.mainWindow.setCentralWidget(self.gl_widget)
+        self.mainWindow.addDockWidget(
+            QtCore.Qt.DockWidgetArea.RightDockWidgetArea,
+            self.layer_list,
+        )
         self.mainWindow.resize(800, 600)
         self.mainWindow.showMaximized()
 
