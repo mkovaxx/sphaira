@@ -1,36 +1,34 @@
 from OpenGL.GL import *
-from PySide.QtGui import QWidget, QLabel, QHBoxLayout, QVBoxLayout, QScrollArea
+from PySide.QtGui import QWidget, QLabel, QTableWidget
 
 import projection as proj
 from glsl import Shader
 
 
-class LayerList(QScrollArea):
+class LayerList(QTableWidget):
 
     def __init__(self):
-        super(LayerList, self).__init__()
-        self.layout = QVBoxLayout()
-        self.setLayout(self.layout)
-        self.layout.addStretch()
+        super(LayerList, self).__init__(0, 1)
         self.layers = []
 
     def add_layer(self, layer):
-        self.layout.addWidget(layer)
         self.layers.append(layer)
+        self.insertRow(0)
+        layer.setup_ui(self, 0)
 
     def __iter__(self):
         return self.layers.__iter__()
 
 
-class Layer(QWidget):
+class Layer(object):
 
     def __init__(self):
         super(Layer, self).__init__()
-        self.layout = QHBoxLayout()
-        self.setLayout(self.layout)
         self.label = QLabel()
         self.label.setText('<empty>')
-        self.layout.addWidget(self.label)
+
+    def setup_ui(self, table, row):
+        table.setCellWidget(row, 0, self.label)
 
     def load_file(self, file_name, in_format):
         self.sphere = proj.load_sphere(file_name, projection=in_format)
