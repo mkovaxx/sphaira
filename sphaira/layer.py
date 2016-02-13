@@ -1,5 +1,14 @@
 from OpenGL.GL import *
-from PySide.QtGui import QWidget, QLabel, QTableWidget
+from PySide import QtCore
+from PySide.QtGui import (
+    QTableWidget,
+    QHeaderView,
+    QLabel,
+    QCheckBox,
+    QSlider,
+    QLineEdit,
+    QDoubleSpinBox,
+)
 
 import projection as proj
 from glsl import Shader
@@ -8,7 +17,17 @@ from glsl import Shader
 class LayerList(QTableWidget):
 
     def __init__(self):
-        super(LayerList, self).__init__(0, 1)
+        super(LayerList, self).__init__(0, 6)
+        self.setHorizontalHeaderLabels([
+            'S', 'alpha', '',
+            'M', 'orientation (w, x, y, z)',
+            'file'
+        ])
+        header = self.horizontalHeader()
+        header.setStretchLastSection(True)
+        header.setResizeMode(0, QHeaderView.ResizeToContents)
+        header.setResizeMode(2, QHeaderView.ResizeToContents)
+        header.setResizeMode(3, QHeaderView.ResizeToContents)
         self.layers = []
 
     def add_layer(self, layer):
@@ -24,11 +43,32 @@ class Layer(object):
 
     def __init__(self):
         super(Layer, self).__init__()
+        self.show = QCheckBox()
+        self.show.setChecked(True)
+        self.alpha_slider = QSlider(QtCore.Qt.Orientation.Horizontal)
+        self.alpha_slider.setRange(0, 1024)
+        self.alpha_slider.setValue(1024)
+        self.alpha_number = QDoubleSpinBox()
+        self.alpha_number.setDecimals(3)
+        self.alpha_number.setSingleStep(0.01)
+        self.alpha_number.setRange(0, 1)
+        self.alpha_number.setValue(1)
+        self.move = QCheckBox()
+        self.move.setChecked(True)
+        self.quat = QLineEdit()
+        self.quat.setInputMask('#0.000, #0.000, #0.000, #0.000')
+        self.quat.setMaxLength(30)
+        self.quat.setText('+0.000, +1.000, +0.000, +0.000')
         self.label = QLabel()
         self.label.setText('<empty>')
 
     def setup_ui(self, table, row):
-        table.setCellWidget(row, 0, self.label)
+        table.setCellWidget(row, 0, self.show)
+        table.setCellWidget(row, 1, self.alpha_slider)
+        table.setCellWidget(row, 2, self.alpha_number)
+        table.setCellWidget(row, 3, self.move)
+        table.setCellWidget(row, 4, self.quat)
+        table.setCellWidget(row, 5, self.label)
 
     def load_file(self, file_name, in_format):
         self.sphere = proj.load_sphere(file_name, projection=in_format)

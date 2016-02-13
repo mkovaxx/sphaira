@@ -102,7 +102,7 @@ class SphairaApp(QApplication):
         self.mainWindow.setWindowTitle(name)
         self.mainWindow.setCentralWidget(self.gl_widget)
         self.mainWindow.addDockWidget(
-            QtCore.Qt.DockWidgetArea.RightDockWidgetArea,
+            QtCore.Qt.DockWidgetArea.BottomDockWidgetArea,
             self.layer_widget,
         )
         self.mainWindow.resize(800, 600)
