@@ -7,6 +7,7 @@ from PySide.QtGui import (
     QCheckBox,
     QSlider,
     QLineEdit,
+    QFont,
     QDoubleSpinBox,
 )
 
@@ -60,6 +61,9 @@ class Layer(object):
         self.move = QCheckBox()
         self.move.setChecked(True)
         self.quat = QLineEdit()
+        font = QFont('monospace')
+        font.setStyleHint(QFont.TypeWriter)
+        self.quat.setFont(font)
         self.quat.setInputMask('#0.000, #0.000, #0.000, #0.000')
         self.quat.setMaxLength(30)
         self.quat.setText('+0.000, +1.000, +0.000, +0.000')
