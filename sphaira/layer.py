@@ -77,6 +77,9 @@ class Layer(object):
         self.label = QLabel()
         self.label.setText('<empty>')
 
+    def alpha(self):
+        return self.alpha_number.value() if self.show.isChecked() else 0.0
+
     def _alphaSliderChanged(self):
         self.alpha_number.setValue(self.alpha_slider.value() / 1024.0)
 
@@ -118,11 +121,12 @@ void main()
 
 FRAGMENT_SHADER = '''
 #version 130
+uniform float alphaFactor;
 varying vec3 texCoord;
 vec4 sample(vec3 v);
 void main()
 {
     gl_FragColor = sample(texCoord);
-    gl_FragColor.a = 0.5;
+    gl_FragColor.a *= alphaFactor;
 }
 '''

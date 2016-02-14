@@ -79,6 +79,7 @@ class SphairaView(QGLWidget):
             glMultMatrixd(array)
             # draw stuff
             layer.shader.bind()
+            layer.shader.uniformf('alphaFactor', layer.alpha())
             glActiveTexture(GL_TEXTURE0 + layer.texture_id)
             layer.sphere.bind_glsl_texture(layer.texture_id, layer.shader)
             self.mesh.draw_triangles()
