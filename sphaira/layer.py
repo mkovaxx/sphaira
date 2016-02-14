@@ -8,6 +8,7 @@ from PySide.QtGui import (
     QSlider,
     QLineEdit,
     QFont,
+    QFontMetrics,
     QDoubleSpinBox,
 )
 
@@ -26,9 +27,8 @@ class LayerList(QTableWidget):
         ])
         hheader = self.horizontalHeader()
         hheader.setStretchLastSection(True)
-        hheader.setResizeMode(0, QHeaderView.ResizeToContents)
-        hheader.setResizeMode(2, QHeaderView.ResizeToContents)
-        hheader.setResizeMode(3, QHeaderView.ResizeToContents)
+        hheader.setResizeMode(QHeaderView.ResizeToContents)
+        hheader.setResizeMode(1, QHeaderView.Interactive)
         vheader = self.verticalHeader()
         vheader.setResizeMode(QHeaderView.ResizeToContents)
         self.layers = []
@@ -64,9 +64,16 @@ class Layer(object):
         font = QFont('monospace')
         font.setStyleHint(QFont.TypeWriter)
         self.quat.setFont(font)
+        default_quat = '+0.000, +1.000, +0.000, +0.000'
+        margins = self.quat.textMargins()
+        self.quat.setFixedWidth(
+            # HACK -------------------------------------------v
+            QFontMetrics(self.quat.font()).width(default_quat + '  ') +
+            margins.left() + margins.right()
+        )
         self.quat.setInputMask('#0.000, #0.000, #0.000, #0.000')
         self.quat.setMaxLength(30)
-        self.quat.setText('+0.000, +1.000, +0.000, +0.000')
+        self.quat.setText(default_quat)
         self.label = QLabel()
         self.label.setText('<empty>')
 
