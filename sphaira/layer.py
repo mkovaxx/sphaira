@@ -3,6 +3,7 @@ from pyrr import Quaternion, Vector3, Matrix44
 from PySide import QtCore
 from PySide.QtGui import (
     QTableWidget,
+    QAbstractItemView,
     QHeaderView,
     QLabel,
     QCheckBox,
@@ -21,6 +22,7 @@ class LayerList(QTableWidget):
 
     def __init__(self):
         super(LayerList, self).__init__(0, 6)
+        self.setSelectionMode(QAbstractItemView.NoSelection)
         self.setHorizontalHeaderLabels([
             'S', 'alpha', '',
             'M', 'orientation (w, x, y, z)',
