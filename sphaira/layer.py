@@ -53,6 +53,8 @@ class Layer(object):
         self.alpha_number.setSingleStep(0.01)
         self.alpha_number.setRange(0, 1)
         self.alpha_number.setValue(1)
+        self.alpha_slider.valueChanged.connect(self._alphaSliderChanged)
+        self.alpha_number.valueChanged.connect(self._alphaNumberChanged)
         self.move = QCheckBox()
         self.move.setChecked(True)
         self.quat = QLineEdit()
@@ -61,6 +63,12 @@ class Layer(object):
         self.quat.setText('+0.000, +1.000, +0.000, +0.000')
         self.label = QLabel()
         self.label.setText('<empty>')
+
+    def _alphaSliderChanged(self):
+        self.alpha_number.setValue(self.alpha_slider.value() / 1024.0)
+
+    def _alphaNumberChanged(self):
+        self.alpha_slider.setValue(1024 * self.alpha_number.value())
 
     def setup_ui(self, table, row):
         table.setCellWidget(row, 0, self.show)
