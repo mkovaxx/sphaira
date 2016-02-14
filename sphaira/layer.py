@@ -23,11 +23,13 @@ class LayerList(QTableWidget):
             'M', 'orientation (w, x, y, z)',
             'file'
         ])
-        header = self.horizontalHeader()
-        header.setStretchLastSection(True)
-        header.setResizeMode(0, QHeaderView.ResizeToContents)
-        header.setResizeMode(2, QHeaderView.ResizeToContents)
-        header.setResizeMode(3, QHeaderView.ResizeToContents)
+        hheader = self.horizontalHeader()
+        hheader.setStretchLastSection(True)
+        hheader.setResizeMode(0, QHeaderView.ResizeToContents)
+        hheader.setResizeMode(2, QHeaderView.ResizeToContents)
+        hheader.setResizeMode(3, QHeaderView.ResizeToContents)
+        vheader = self.verticalHeader()
+        vheader.setResizeMode(QHeaderView.ResizeToContents)
         self.layers = []
 
     def add_layer(self, layer):
