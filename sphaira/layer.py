@@ -83,6 +83,7 @@ class Layer(object):
         self.quat.setInputMask('#0.000, #0.000, #0.000, #0.000')
         self.quat.setMaxLength(30)
         self.quat.setText(default_quat)
+        self.quat.editingFinished.connect(self._orientationChanged)
         self.label = QLabel()
         self.label.setText('<empty>')
 
@@ -99,6 +100,10 @@ class Layer(object):
                 self.orientation.z,
             )
         )
+
+    def _orientationChanged(self):
+        text = self.quat.text()
+        print 'orientation changed to: %s' % text
 
     def alpha(self):
         return self.alpha_number.value() if self.show.isChecked() else 0.0
