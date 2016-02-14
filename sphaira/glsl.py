@@ -47,11 +47,9 @@ class Shader:
                 # retrieve the uniform location, and set
             }[len(vals)](glGetUniformLocation(self.handle, name), *vals)
 
-    # upload a uniform matrix
-    # works with matrices stored as lists,
-    # as well as euclid matrices
-    def uniform_matrixf(self, name, mat):
+    # upload a 3x3 matrix uniform
+    def uniformf_m3x3(self, name, mat):
         # obtian the uniform location
-        loc = glGetUniformLocation(self.Handle, name)
-        # uplaod the 4x4 floating point matrix
-        glUniformMatrix4fv(loc, 1, False, (c_float * 16)(*mat))
+        loc = glGetUniformLocation(self.handle, name)
+        # uplaod the 3x3 floating point matrix
+        glUniformMatrix3fv(loc, 1, False, (c_float * 9)(*mat))

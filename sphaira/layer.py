@@ -1,4 +1,5 @@
 from OpenGL.GL import *
+from pyrr import Quaternion, Vector3, Matrix44
 from PySide import QtCore
 from PySide.QtGui import (
     QTableWidget,
@@ -41,11 +42,17 @@ class LayerList(QTableWidget):
     def __iter__(self):
         return self.layers.__iter__()
 
+    def multiplyOrientation(self, quat):
+        for layer in self.layers:
+            if layer.move.isChecked():
+                layer.multiplyOrientation(quat)
+
 
 class Layer(object):
 
     def __init__(self):
         super(Layer, self).__init__()
+        self.orientation = Quaternion()
         self.show = QCheckBox()
         self.show.setChecked(True)
         self.alpha_slider = QSlider(QtCore.Qt.Orientation.Horizontal)
@@ -76,6 +83,20 @@ class Layer(object):
         self.quat.setText(default_quat)
         self.label = QLabel()
         self.label.setText('<empty>')
+
+    def multiplyOrientation(self, quat):
+        self.setOrientation(quat * self.orientation)
+
+    def setOrientation(self, quat):
+        self.orientation = quat
+        self.quat.setText(
+            '%+1.3f, %+1.3f, %+1.3f, %+1.3f' % (
+                self.orientation.w,
+                self.orientation.x,
+                self.orientation.y,
+                self.orientation.z,
+            )
+        )
 
     def alpha(self):
         return self.alpha_number.value() if self.show.isChecked() else 0.0
@@ -122,11 +143,12 @@ void main()
 FRAGMENT_SHADER = '''
 #version 130
 uniform float alphaFactor;
+uniform mat3x3 orientation;
 varying vec3 texCoord;
 vec4 sample(vec3 v);
 void main()
 {
-    gl_FragColor = sample(texCoord);
+    gl_FragColor = sample(orientation * texCoord);
     gl_FragColor.a *= alphaFactor;
 }
 '''

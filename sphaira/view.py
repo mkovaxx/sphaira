@@ -18,7 +18,6 @@ class SphairaView(QGLWidget):
 
     def __init__(self, layers):
         super(SphairaView, self).__init__()
-        self.orientation = Quaternion()
         self.mesh = SphericalMesh(4)
         self.old_pos = QtCore.QPoint(0, 0)
         self.setMouseTracking(True)
@@ -49,10 +48,10 @@ class SphairaView(QGLWidget):
                 return
             v = Vector3([dy, dx, 0])
             # update the current orientation
-            self.orientation *= Quaternion.from_axis_rotation(
+            self.layers.multiplyOrientation(Quaternion.from_axis_rotation(
                 -v.normalised,
-                v.length * 0.002
-            )
+                -v.length * 0.002,
+            ))
         self.old_pos = pos
         self.update()
 
@@ -71,15 +70,15 @@ class SphairaView(QGLWidget):
             glMatrixMode(GL_MODELVIEW)
             glLoadIdentity()
             glTranslatef(0, 0, -2.9)
-            m = self.orientation.matrix44
-            array = (GLdouble * 16)()
-            for i in xrange(4):
-                for j in xrange(4):
-                    array[4*i + j] = m[i,j]
-            glMultMatrixd(array)
             # draw stuff
             layer.shader.bind()
             layer.shader.uniformf('alphaFactor', layer.alpha())
+            m = layer.orientation.matrix33
+            array = (GLdouble * 9)()
+            for i in xrange(3):
+                for j in xrange(3):
+                    array[3*i + j] = m[i,j]
+            layer.shader.uniformf_m3x3('orientation', array)
             glActiveTexture(GL_TEXTURE0 + layer.texture_id)
             layer.sphere.bind_glsl_texture(layer.texture_id, layer.shader)
             self.mesh.draw_triangles()
