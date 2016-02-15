@@ -21,28 +21,58 @@ from glsl import Shader
 class LayerList(QTableWidget):
 
     def __init__(self):
-        super(LayerList, self).__init__(0, 6)
-        self.setSelectionMode(QAbstractItemView.NoSelection)
+        super(LayerList, self).__init__(0, 7)
+        self.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setDragDropMode(QAbstractItemView.InternalMove)
         self.setHorizontalHeaderLabels([
-            'S', 'alpha', '',
+            'S',
+            'V', 'alpha', '',
             'M', 'orientation (w, x, y, z)',
             'file'
         ])
         hheader = self.horizontalHeader()
         hheader.setStretchLastSection(True)
         hheader.setResizeMode(QHeaderView.ResizeToContents)
-        hheader.setResizeMode(1, QHeaderView.Interactive)
+        hheader.setResizeMode(2, QHeaderView.Interactive)
         vheader = self.verticalHeader()
         vheader.setResizeMode(QHeaderView.ResizeToContents)
         self.layers = []
 
+    def dropEvent(self, event):
+        if event.source() != self:
+            QTableView.dropEvent(event)
+            return
+        src_row = self.selectedIndexes()[0].row()
+        dst_row = self.rowAt(event.pos().y())
+        if dst_row == -1:
+            dst_row = self.rowCount()
+        self.move_layer(src_row, dst_row)
+        if src_row < dst_row:
+            dst_row -= 1
+        self.selectRow(dst_row)
+        event.accept()
+
+    def move_layer(self, src_row, dst_row):
+        self.insert_layer(dst_row, self.layers[src_row])
+        if dst_row < src_row:
+            src_row += 1
+        self.remove_layer(src_row)
+
+    def insert_layer(self, index, layer):
+        self.layers.insert(index, layer)
+        self.insertRow(index)
+        layer.setup_ui(self, index)
+
+    def remove_layer(self, index):
+        self.removeRow(index)
+        del self.layers[index]
+
     def add_layer(self, layer):
-        self.layers.append(layer)
-        self.insertRow(0)
-        layer.setup_ui(self, 0)
+        self.insert_layer(0, layer)
 
     def __iter__(self):
-        return self.layers.__iter__()
+        return reversed(self.layers)
 
     def multiplyOrientation(self, quat):
         for layer in self.layers:
@@ -115,12 +145,12 @@ class Layer(object):
         self.alpha_slider.setValue(1024 * self.alpha_number.value())
 
     def setup_ui(self, table, row):
-        table.setCellWidget(row, 0, self.show)
-        table.setCellWidget(row, 1, self.alpha_slider)
-        table.setCellWidget(row, 2, self.alpha_number)
-        table.setCellWidget(row, 3, self.move)
-        table.setCellWidget(row, 4, self.quat)
-        table.setCellWidget(row, 5, self.label)
+        table.setCellWidget(row, 1, self.show)
+        table.setCellWidget(row, 2, self.alpha_slider)
+        table.setCellWidget(row, 3, self.alpha_number)
+        table.setCellWidget(row, 4, self.move)
+        table.setCellWidget(row, 5, self.quat)
+        table.setCellWidget(row, 6, self.label)
 
     def load_file(self, file_name, in_format):
         self.sphere = proj.load_sphere(file_name, projection=in_format)
