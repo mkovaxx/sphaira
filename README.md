@@ -7,7 +7,7 @@ Utility and library for viewing and editing spherical images.
 
 ### 0.3.0
 
-#### viewer
+#### view
 
 - switch to PySide for graphical UI
 - layers, layer list view
@@ -24,7 +24,7 @@ Utility and library for viewing and editing spherical images.
 - conversion code complexity is O(n) instead of O(n^2) in number of projections
 - supported projections: Equirect, CubeMap
 
-#### viewer
+#### view
 
 - simple command-line and graphical UI using Pyglet and OpenGL
 - quaternion based orientation
