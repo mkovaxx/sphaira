@@ -5,6 +5,15 @@ Utility and library for viewing and editing spherical images.
 
 ## Version History
 
+### 0.3.0
+
+#### viewer
+
+- switch to PySide for graphical UI
+- layers, layer list view
+- per-layer controls: visibility, alpha, moving, orientation, file name
+- layer list controls: drag and drop, add (open file) & remove layers
+
 ### 0.2.2
 
 #### lib
