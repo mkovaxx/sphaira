@@ -12,7 +12,7 @@ from PySide.QtOpenGL import QGLWidget
 import projection as proj
 from geom import SphericalMesh
 from glsl import Shader
-from layer import Layer, LayerList
+from layer import Layer, LayerList, LayerListWithToolBar
 
 class SphairaView(QGLWidget):
 
@@ -95,7 +95,7 @@ class SphairaApp(QApplication):
             QDockWidget.DockWidgetMovable |
             QDockWidget.DockWidgetFloatable
         )
-        self.layer_list = LayerList()
+        self.layer_list = LayerListWithToolBar()
         self.layer_widget.setWidget(self.layer_list)
         self.gl_widget = SphairaView(self.layer_list)
         self.mainWindow = QMainWindow()

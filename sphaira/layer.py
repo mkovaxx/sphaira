@@ -2,6 +2,11 @@ from OpenGL.GL import *
 from pyrr import Quaternion, Vector3, Matrix44
 from PySide import QtCore
 from PySide.QtGui import (
+    QWidget,
+    QVBoxLayout,
+    QToolBar,
+    QIcon,
+    QFileDialog,
     QTableWidget,
     QAbstractItemView,
     QHeaderView,
@@ -16,6 +21,49 @@ from PySide.QtGui import (
 
 import projection as proj
 from glsl import Shader
+
+class LayerListWithToolBar(QWidget):
+
+    def __init__(self):
+        super(LayerListWithToolBar, self).__init__()
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+        self.list = LayerList()
+        self.toolbar = QToolBar()
+        add_action = self.toolbar.addAction(
+            QIcon.fromTheme('list-add'),
+            'add',
+        ).triggered.connect(self._add)
+        remove_action = self.toolbar.addAction(
+            QIcon.fromTheme('list-remove'),
+            'remove',
+        ).triggered.connect(self._remove)
+        self.layout().addWidget(self.toolbar)
+        self.layout().addWidget(self.list)
+
+    def _add(self):
+        dialog = QFileDialog(self)
+        dialog.setFileMode(QFileDialog.ExistingFiles)
+        dialog.setViewMode(QFileDialog.Detail)
+        fileNames = dialog.selectedFiles() if dialog.exec_() else []
+        for fileName in fileNames:
+            layer = Layer()
+            layer.load_file(fileName, None)
+            self.list.add_layer(layer)
+
+    def _remove(self):
+        rows = sorted({index.row() for index in self.list.selectedIndexes()})
+        for row in reversed(rows):
+            self.list.remove_layer(row)
+
+    def add_layer(self, layer):
+        self.list.add_layer(layer)
+
+    def __iter__(self):
+        return self.list.__iter__()
+
+    def multiplyOrientation(self, quat):
+        self.list.multiplyOrientation(quat)
 
 
 class LayerList(QTableWidget):
