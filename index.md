@@ -11,6 +11,8 @@ args: none
 
 pip install sphaira
 
+Or get the source directly from the [GitHub repo](https://github.com/mkovacs/sphaira).
+
 ## Tools
 
 * spconvert
@@ -20,7 +22,3 @@ pip install sphaira
 
 * Equirect
 * CubeMap
-
-## Source Code
-
-[Sphaira on GitHub](https://github.com/mkovacs/sphaira)
