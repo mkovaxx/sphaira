@@ -20,3 +20,7 @@ pip install sphaira
 
 * Equirect
 * CubeMap
+
+## Source Code
+
+[Sphaira on GitHub](https://github.com/mkovacs/sphaira)
