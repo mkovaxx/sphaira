@@ -118,7 +118,7 @@ def main():
         description='Sphaira viewer for spherical data.',
     )
     parser.add_argument('-i', '--in_format', help='IN_FORMAT')
-    parser.add_argument('input', nargs='+', help='INPUT')
+    parser.add_argument('input', nargs='*', help='INPUT')
     (args, leftover) = parser.parse_known_args()
     in_format = proj.get_format(args.in_format)
     app = SphairaApp(leftover)
