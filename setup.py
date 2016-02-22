@@ -3,7 +3,7 @@ import numpy.distutils.misc_util
 
 setup(
     name = 'sphaira',
-    version = '0.3.0',
+    version = '0.3.1',
     description = 'Work with spherical images.',
     url = 'http://sphaira.org',
     author = 'Mate Kovacs',

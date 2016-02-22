@@ -5,6 +5,13 @@ Utility and library for viewing and editing spherical images.
 
 ## Version History
 
+### 0.3.1
+
+#### view
+
+- add Layer memory usage indicator
+- allow invocation without inputs
+
 ### 0.3.0
 
 #### view
