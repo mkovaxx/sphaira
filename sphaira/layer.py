@@ -69,7 +69,7 @@ class LayerListWithToolBar(QWidget):
 class LayerList(QTableWidget):
 
     def __init__(self):
-        super(LayerList, self).__init__(0, 7)
+        super(LayerList, self).__init__(0, 8)
         self.setSelectionMode(QAbstractItemView.SingleSelection)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.setDragDropMode(QAbstractItemView.InternalMove)
@@ -77,7 +77,8 @@ class LayerList(QTableWidget):
             'S',
             'V', 'alpha', '',
             'M', 'orientation (w, x, y, z)',
-            'file'
+            'size [byte]', # Question(mkovacs): Should this say 'octet' instead?
+            'file',
         ])
         hheader = self.horizontalHeader()
         hheader.setStretchLastSection(True)
@@ -162,6 +163,9 @@ class Layer(object):
         self.quat.setMaxLength(30)
         self.quat.setText(default_quat)
         self.quat.editingFinished.connect(self._orientationChanged)
+        self.nbytes = QLabel()
+        self.nbytes.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.nbytes.setText('0')
         self.label = QLabel()
         self.label.setText('<empty>')
 
@@ -198,7 +202,8 @@ class Layer(object):
         table.setCellWidget(row, 3, self.alpha_number)
         table.setCellWidget(row, 4, self.move)
         table.setCellWidget(row, 5, self.quat)
-        table.setCellWidget(row, 6, self.label)
+        table.setCellWidget(row, 6, self.nbytes)
+        table.setCellWidget(row, 7, self.label)
 
     def load_file(self, file_name, in_format):
         self.sphere = proj.load_sphere(file_name, projection=in_format)
@@ -211,6 +216,16 @@ class Layer(object):
             frag=FRAGMENT_SHADER + self.sphere.get_glsl_sampler(),
         )
         self.label.setText(file_name)
+        self.nbytes.setText(read_bsize(self.sphere.array.nbytes))
+
+
+def read_bsize(n):
+    suffixes = ['', ' Ki', ' Mi', ' Gi', ' Ti', ' Pi', ' Ei', ' Zi', ' Yi']
+    for suffix in suffixes:
+        if n < 1024:
+            break
+        n /= 1024.0
+    return '%s%s' % (format(n, '.2f').rstrip('0').rstrip('.'), suffix)
 
 
 VERTEX_SHADER = '''
