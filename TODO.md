@@ -10,6 +10,7 @@
 * views
 * Sky view
 * Ball view
+* add zoom
 * finish HealPix projection
 * OctaHdrl projection
 * output image filtering
