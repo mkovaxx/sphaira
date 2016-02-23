@@ -185,7 +185,6 @@ class Layer(object):
 
     def _orientationChanged(self):
         text = self.quat.text()
-        print 'orientation changed to: %s' % text
 
     def alpha(self):
         return self.alpha_number.value() if self.show.isChecked() else 0.0
