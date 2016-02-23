@@ -3,6 +3,7 @@ from pyrr import Quaternion, Vector3, Matrix44
 from PySide import QtCore
 from PySide.QtGui import (
     QWidget,
+    QHBoxLayout,
     QVBoxLayout,
     QToolBar,
     QIcon,
@@ -196,13 +197,19 @@ class Layer(object):
         self.alpha_slider.setValue(1024 * self.alpha_number.value())
 
     def setup_ui(self, table, row):
-        table.setCellWidget(row, 1, self.show)
-        table.setCellWidget(row, 2, self.alpha_slider)
-        table.setCellWidget(row, 3, self.alpha_number)
-        table.setCellWidget(row, 4, self.move)
-        table.setCellWidget(row, 5, self.quat)
-        table.setCellWidget(row, 6, self.nbytes)
-        table.setCellWidget(row, 7, self.label)
+        widgets = [
+            None,
+            CenterH(self.show),
+            self.alpha_slider,
+            self.alpha_number,
+            CenterH(self.move),
+            self.quat,
+            self.nbytes,
+            self.label,
+        ]
+        for (column, widget) in enumerate(widgets):
+            if widget is not None:
+                table.setCellWidget(row, column, widget)
 
     def load_file(self, file_name, in_format):
         self.sphere = proj.load_sphere(file_name, projection=in_format)
@@ -225,6 +232,17 @@ def read_bsize(n):
             break
         n /= 1024.0
     return '%s%s' % (format(n, '.2f').rstrip('0').rstrip('.'), suffix)
+
+
+class CenterH(QWidget):
+
+    def __init__(self, widget):
+        super(CenterH, self).__init__()
+        layout = QHBoxLayout()
+        self.setLayout(layout)
+        layout.addStretch()
+        layout.addWidget(widget)
+        layout.addStretch()
 
 
 VERTEX_SHADER = '''
