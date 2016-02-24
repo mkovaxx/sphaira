@@ -5,6 +5,13 @@ Utility and library for viewing and editing spherical images.
 
 ## Version History
 
+### 0.3.2
+
+#### view
+
+- add zoom
+- fix horizontal alignment of checkboxes on the Layer UI
+
 ### 0.3.1
 
 #### view
