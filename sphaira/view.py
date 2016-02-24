@@ -22,6 +22,7 @@ class SphairaView(QGLWidget):
         self.old_pos = QtCore.QPoint(0, 0)
         self.setMouseTracking(True)
         self.layers = layers
+        self.zoom = 0.9
 
     def load_file(self, filename, in_format):
         layer = Layer()
@@ -52,6 +53,9 @@ class SphairaView(QGLWidget):
                 -v.normalised,
                 -v.length * 0.002,
             ))
+        elif event.buttons() & QtCore.Qt.RightButton > 0:
+            dz = pos.y() - self.old_pos.y()
+            self.zoom = max(0, self.zoom + dz / 100.0)
         self.old_pos = pos
         self.update()
 
@@ -65,11 +69,11 @@ class SphairaView(QGLWidget):
         glEnable(GL_CULL_FACE)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
         glFrontFace(GL_CCW)
-        glCullFace(GL_BACK)
+        glCullFace(GL_BACK if self.zoom > 1.0 else GL_FRONT)
         for layer in self.layers:
             glMatrixMode(GL_MODELVIEW)
             glLoadIdentity()
-            glTranslatef(0, 0, -2.9)
+            glTranslatef(0, 0, -self.zoom)
             # draw stuff
             layer.shader.bind()
             layer.shader.uniformf('alphaFactor', layer.alpha())
