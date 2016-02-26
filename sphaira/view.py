@@ -7,7 +7,7 @@ from PIL import Image
 from pyrr import Quaternion, Vector3, Matrix44
 from PySide import QtCore
 from PySide.QtGui import QMainWindow, QApplication, QDockWidget
-from PySide.QtOpenGL import QGLWidget
+from PySide.QtOpenGL import QGLWidget, QGLFormat
 
 import projection as proj
 from geom import SphericalMesh
@@ -17,6 +17,10 @@ from layer import Layer, LayerList, LayerListWithToolBar
 class SphairaView(QGLWidget):
 
     def __init__(self, layers):
+        format = QGLFormat()
+        format.setVersion(3, 2)
+        format.setProfile(QGLFormat.CompatibilityProfile)
+        QGLFormat.setDefaultFormat(format)
         super(SphairaView, self).__init__()
         self.mesh = SphericalMesh(4)
         self.old_pos = QtCore.QPoint(0, 0)
@@ -30,7 +34,11 @@ class SphairaView(QGLWidget):
         self.layers.add_layer(layer)
 
     def initializeGL(self):
-        pass
+        print self.format().majorVersion()
+        print self.format().minorVersion()
+        print self.format().profile()
+        print glGetString(GL_VERSION)
+        print glGetString(GL_SHADING_LANGUAGE_VERSION)
 
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)
