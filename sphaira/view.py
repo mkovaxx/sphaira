@@ -18,7 +18,7 @@ class SphairaView(QGLWidget):
 
     def __init__(self, layers):
         format = QGLFormat()
-        format.setVersion(3, 2)
+        format.setVersion(2, 1)
         format.setProfile(QGLFormat.CompatibilityProfile)
         QGLFormat.setDefaultFormat(format)
         super(SphairaView, self).__init__()

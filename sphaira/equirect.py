@@ -68,7 +68,7 @@ vec4 sample(vec3 v) {
     float theta = acos(v.z / r);
     float t = 0.5*phi/M_PI + 0.5;
     float u = theta/M_PI;
-    return texture(rectMap, vec2(t, u));
+    return texture2D(rectMap, vec2(t, u));
 }
 '''
 

@@ -246,7 +246,7 @@ class CenterH(QWidget):
 
 
 VERTEX_SHADER = '''
-#version 150
+#version 120
 attribute vec4 vert;
 varying vec3 texCoord;
 void main()
@@ -258,7 +258,7 @@ void main()
 
 
 FRAGMENT_SHADER = '''
-#version 150
+#version 120
 uniform float alphaFactor;
 uniform mat3x3 orientation;
 varying vec3 texCoord;

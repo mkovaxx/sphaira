@@ -94,7 +94,7 @@ class CubeMap(object):
         return '''
 uniform samplerCube cubeMap;
 vec4 sample(vec3 v) {
-    return texture(cubeMap, v);
+    return textureCube(cubeMap, v);
 }
 '''
 
