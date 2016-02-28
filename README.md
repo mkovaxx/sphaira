@@ -1,9 +1,16 @@
 sphaira
 =======
 
-Utility and library for viewing and editing spherical images.
+Open-source toolset for spherical imaging.
 
 ## Version History
+
+### 0.3.3
+
+#### view
+
+- lower requirements to OpenGL 2.1 and GLSL 120
+- log OpenGL and GLSL version info for the acquired context
 
 ### 0.3.2
 
