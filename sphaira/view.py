@@ -34,11 +34,12 @@ class SphairaView(QGLWidget):
         self.layers.add_layer(layer)
 
     def initializeGL(self):
-        print self.format().majorVersion()
-        print self.format().minorVersion()
-        print self.format().profile()
-        print glGetString(GL_VERSION)
-        print glGetString(GL_SHADING_LANGUAGE_VERSION)
+        print(
+            'OpenGL version: {0}'.format(glGetString(GL_VERSION))
+        )
+        print(
+            'GLSL version: {0}'.format(glGetString(GL_SHADING_LANGUAGE_VERSION))
+        )
 
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)
