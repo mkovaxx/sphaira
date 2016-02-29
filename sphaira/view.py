@@ -18,8 +18,8 @@ class SphairaView(QGLWidget):
 
     def __init__(self, layers):
         format = QGLFormat()
-        format.setVersion(2, 1)
-        format.setProfile(QGLFormat.CompatibilityProfile)
+        format.setVersion(3, 2)
+        format.setProfile(QGLFormat.CoreProfile)
         QGLFormat.setDefaultFormat(format)
         super(SphairaView, self).__init__()
         self.mesh = SphericalMesh(4)
@@ -43,9 +43,13 @@ class SphairaView(QGLWidget):
 
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        gluPerspective(50, float(w) / h, .01, 100)
+        # glMatrixMode(GL_PROJECTION)
+        # glLoadIdentity()
+        # gluPerspective(50, float(w) / h, .01, 100)
+        self.projTransform = Matrix44.perspective_projection(
+            50, float(w) / h,
+            0.01, 100.0,
+        )
 
     def mouseMoveEvent(self, event):
         pos = event.pos()
@@ -80,9 +84,9 @@ class SphairaView(QGLWidget):
         glFrontFace(GL_CCW)
         glCullFace(GL_BACK if self.zoom > 1.0 else GL_FRONT)
         for layer in self.layers:
-            glMatrixMode(GL_MODELVIEW)
-            glLoadIdentity()
-            glTranslatef(0, 0, -self.zoom)
+            #glMatrixMode(GL_MODELVIEW)
+            #glLoadIdentity()
+            #glTranslatef(0, 0, -self.zoom)
             # draw stuff
             layer.shader.bind()
             layer.shader.uniformf('alphaFactor', layer.alpha())
@@ -92,6 +96,14 @@ class SphairaView(QGLWidget):
                 for j in xrange(3):
                     array[3*i + j] = m[i,j]
             layer.shader.uniformf_m3x3('orientation', array)
+            # setup view transform
+            m = self.projTransform
+            m *= Matrix44.from_translation(Vector3([0, 0, -self.zoom]))
+            array = (GLdouble * 16)()
+            for i in xrange(4):
+                for j in xrange(4):
+                    array[4*i + j] = m[i,j]
+            layer.shader.uniformf_m4x4('viewTransform', array)
             glActiveTexture(GL_TEXTURE0 + layer.texture_id)
             layer.sphere.bind_glsl_texture(layer.texture_id, layer.shader)
             self.mesh.draw_triangles()

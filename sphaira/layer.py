@@ -247,11 +247,12 @@ class CenterH(QWidget):
 
 VERTEX_SHADER = '''
 #version 120
-attribute vec4 vert;
+uniform mat4x4 viewTransform;
+attribute vec3 vert;
 varying vec3 texCoord;
 void main()
 {
-    gl_Position = gl_ModelViewProjectionMatrix * vert;
+    gl_Position = viewTransform * vec4(vert);
     texCoord = vert.xyz;
 }
 '''

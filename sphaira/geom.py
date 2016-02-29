@@ -18,15 +18,22 @@ class SphericalMesh(object):
             self.vertices[i].normalise()
         vertex_array = np.array(self.vertices, dtype=np.float32)
         self.vertex_buffer = vbo.VBO(vertex_array)
-        index_array = np.array(self.indices, dtype=np.int32)
+        index_array = np.array(self.indices, dtype=np.uint32)
         self.index_buffer = vbo.VBO(index_array, target=GL_ELEMENT_ARRAY_BUFFER)
         self.index_count = len(self.indices)
+        # init vertex array object
+        self.vao = glGenVertexArrays(1)
+        glBindVertexArray(self.vao)
+        # init vertex buffer
+        self.vertex_buffer.bind()
+        #location = glGetAttribLocation(shader, 'vert')
+        location = 0
+        glEnableVertexAttribArray(location)
+        glVertexAttribPointer(location, 3, GL_FLOAT, False, 0, None)
+        glBindVertexArray(0)
 
     def draw_triangles(self):
-        self.vertex_buffer.bind()
-        self.index_buffer.bind()
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, False, 0, None)
+        glBindVertexArray(self.vao)
         glDrawElements(GL_TRIANGLES, self.index_count, GL_UNSIGNED_INT, None)
 
 

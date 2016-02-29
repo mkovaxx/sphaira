@@ -39,12 +39,12 @@ class Equirect(object):
         return self.array
 
     def to_gl(self, texture_id):
-        # enable cube map texturing
-        glEnable(GL_TEXTURE_2D)
+        # enable texturing
+        #glEnable(GL_TEXTURE_2D)
         # generate and bind texture
         glBindTexture(GL_TEXTURE_2D, texture_id)
         # set up texturing parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE)
+        #glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
@@ -54,7 +54,7 @@ class Equirect(object):
         (height, width, depth) = self.array.shape
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
         glTexImage2D(
-            GL_TEXTURE_2D, 0, 4,
+            GL_TEXTURE_2D, 0, GL_RGBA32F,
             width, height, 0, GL_RGBA, GL_FLOAT, self.array,
         )
 
