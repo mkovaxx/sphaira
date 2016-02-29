@@ -25,15 +25,14 @@ class SphericalMesh(object):
         self.vao = glGenVertexArrays(1)
         glBindVertexArray(self.vao)
         # init vertex buffer
-        self.vertex_buffer.bind()
-        #location = glGetAttribLocation(shader, 'vert')
-        location = 0
-        glEnableVertexAttribArray(location)
-        glVertexAttribPointer(location, 3, GL_FLOAT, False, 0, None)
         glBindVertexArray(0)
 
-    def draw_triangles(self):
+    def draw_triangles(self, shader):
         glBindVertexArray(self.vao)
+        self.vertex_buffer.bind()
+        location = glGetAttribLocation(shader, 'vert')
+        glEnableVertexAttribArray(location)
+        glVertexAttribPointer(location, 3, GL_FLOAT, False, 0, None)
         glDrawElements(GL_TRIANGLES, self.index_count, GL_UNSIGNED_INT, None)
 
 

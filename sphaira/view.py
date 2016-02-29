@@ -22,7 +22,6 @@ class SphairaView(QGLWidget):
         format.setProfile(QGLFormat.CoreProfile)
         QGLFormat.setDefaultFormat(format)
         super(SphairaView, self).__init__()
-        self.mesh = SphericalMesh(4)
         self.old_pos = QtCore.QPoint(0, 0)
         self.setMouseTracking(True)
         self.layers = layers
@@ -40,6 +39,7 @@ class SphairaView(QGLWidget):
         print(
             'GLSL version: {0}'.format(glGetString(GL_SHADING_LANGUAGE_VERSION))
         )
+        self.mesh = SphericalMesh(4)
 
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)
@@ -106,7 +106,7 @@ class SphairaView(QGLWidget):
             layer.shader.uniformf_m4x4('viewTransform', array)
             glActiveTexture(GL_TEXTURE0 + layer.texture_id)
             layer.sphere.bind_glsl_texture(layer.texture_id, layer.shader)
-            self.mesh.draw_triangles()
+            self.mesh.draw_triangles(layer.shader.handle)
 
 
 class SphairaApp(QApplication):

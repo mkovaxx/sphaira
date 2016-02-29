@@ -252,7 +252,7 @@ attribute vec3 vert;
 varying vec3 texCoord;
 void main()
 {
-    gl_Position = viewTransform * vec4(vert);
+    gl_Position = viewTransform * vec4(vert, 0);
     texCoord = vert.xyz;
 }
 '''
@@ -268,5 +268,6 @@ void main()
 {
     gl_FragColor = sample(orientation * texCoord);
     gl_FragColor.a *= alphaFactor;
+    gl_FragColor = vec4(1, 0, 0, 1);
 }
 '''
