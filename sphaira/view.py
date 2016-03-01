@@ -43,9 +43,6 @@ class SphairaView(QGLWidget):
 
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)
-        # glMatrixMode(GL_PROJECTION)
-        # glLoadIdentity()
-        # gluPerspective(50, float(w) / h, .01, 100)
         self.projTransform = Matrix44.perspective_projection(
             50, float(w) / h,
             0.01, 100.0,
@@ -83,11 +80,8 @@ class SphairaView(QGLWidget):
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
         glFrontFace(GL_CCW)
         glCullFace(GL_BACK if self.zoom > 1.0 else GL_FRONT)
+        self.mesh.bind()
         for layer in self.layers:
-            #glMatrixMode(GL_MODELVIEW)
-            #glLoadIdentity()
-            #glTranslatef(0, 0, -self.zoom)
-            # draw stuff
             layer.shader.bind()
             layer.shader.uniformf('alphaFactor', layer.alpha())
             m = layer.orientation.matrix33
@@ -98,7 +92,7 @@ class SphairaView(QGLWidget):
             layer.shader.uniformf_m3x3('orientation', array)
             # setup view transform
             m = self.projTransform
-            m *= Matrix44.from_translation(Vector3([0, 0, -self.zoom]))
+            m = Matrix44.from_translation(Vector3([0, 0, -self.zoom])) * m
             array = (GLdouble * 16)()
             for i in xrange(4):
                 for j in xrange(4):

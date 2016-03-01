@@ -23,13 +23,13 @@ class SphericalMesh(object):
         self.index_count = len(self.indices)
         # init vertex array object
         self.vao = glGenVertexArrays(1)
-        glBindVertexArray(self.vao)
-        # init vertex buffer
-        glBindVertexArray(0)
 
-    def draw_triangles(self, shader):
+    def bind(self):
         glBindVertexArray(self.vao)
         self.vertex_buffer.bind()
+        self.index_buffer.bind()
+
+    def draw_triangles(self, shader):
         location = glGetAttribLocation(shader, 'vert')
         glEnableVertexAttribArray(location)
         glVertexAttribPointer(location, 3, GL_FLOAT, False, 0, None)
