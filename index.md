@@ -2,7 +2,7 @@
 layout: page
 user: mkovacs
 title: Sphaira
-tagline: Tools for working with spherical images
+tagline: Open-source toolset for spherical imaging
 google: UA-72173163-1
 args: none
 ---
