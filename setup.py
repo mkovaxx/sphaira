@@ -4,7 +4,7 @@ import numpy.distutils.misc_util
 setup(
     name = 'sphaira',
     version = '0.3.3',
-    description = 'Open-source toolset for spherical imaging.',
+    description = 'Open-source toolset for spherical imaging',
     url = 'http://sphaira.org',
     author = 'Mate Kovacs',
     author_email = 'mkovaxx@gmail.com',
