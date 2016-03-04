@@ -13,7 +13,7 @@ pip install [sphaira](https://pypi.python.org/pypi/sphaira)
 
 ## Get the Source
 
-git clone https://github.com/mkovacs/sphaira.git
+git clone [https://github.com/mkovacs/sphaira.git](https://github.com/mkovacs/sphaira.git)
 
 ## Tools
 
