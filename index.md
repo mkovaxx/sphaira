@@ -9,16 +9,18 @@ args: none
 
 ## Install
 
-pip install sphaira
+pip install [sphaira](https://pypi.python.org/pypi/sphaira)
 
-Or get the source directly from the [GitHub repo](https://github.com/mkovacs/sphaira).
+## Get the Source
+
+git clone [https://github.com/mkovacs/sphaira.git]
 
 ## Tools
 
 * spconvert
 * spview
 
-## Supported projections
+## Supported Projections
 
 * Equirect
 * CubeMap
