@@ -25,16 +25,9 @@ class Equirect(object):
         return 0
 
     @classmethod
-    def check_image(cls, image):
-        if image.dtype != np.float32:
-            return 1
-        if image.ndim != 3:
-            return 2
-        (height, width, depth) = image.shape
-        if depth != 4:
-            return 3
+    def check_image_shape(cls, width, height):
         if width != 2*height:
-            return 4
+            return 1
         return 0
 
     @classmethod

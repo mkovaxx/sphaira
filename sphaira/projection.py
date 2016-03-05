@@ -20,22 +20,24 @@ def convert_sphere(sphere, projection):
 
 
 def load_sphere(file_name, projection):
-    image = Image.open(file_name).convert('RGBA')
-    array = np.array(image, dtype=np.float32) / 255
+    image = Image.open(file_name)
+    width = image.width
+    height = image.height
     if projection is not None:
-        if projection.check_image(array) != 0:
+        if projection.check_image_shape(width, height) != 0:
             raise RuntimeError(
                 'The contents of %s are not in %s format.'
                 % (file_name, projection.__name__)
             )
     else:
-        formats = detect_format(array)
+        formats = detect_format(width, height)
         if len(formats) < 1:
             raise LookupError('Unknown format.')
         if len(formats) > 1:
             raise LookupError('Ambiguous format: %s.' % formats)
         projection = formats[0]
-    sphere = projection.from_image(array)
+    normalized_image = np.array(image.convert('RGBA'), dtype=np.float32) / 255
+    sphere = projection.from_image(normalized_image)
     return sphere
 
 
@@ -45,10 +47,10 @@ def save_sphere(file_name, sphere):
     image.save(file_name)
 
 
-def detect_format(image):
+def detect_format(width, height):
     compatible_projections = []
     for projection in PROJECTION_BY_NAME.itervalues():
-        if projection.check_image(image) == 0:
+        if projection.check_image_shape(width, height) == 0:
             compatible_projections.append(projection)
     return compatible_projections
 
