@@ -14,6 +14,7 @@ def main():
     args = parser.parse_args()
     in_format = proj.get_format(args.in_format)
     out_format = proj.get_format(args.out_format)
+    assert out_format is not None
     sphere = proj.load_sphere(args.input, projection=in_format)
     in_format = sphere.__class__
     print('Loaded input %s from %s.' % (in_format.__name__, args.input))

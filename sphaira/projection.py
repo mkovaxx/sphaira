@@ -14,7 +14,7 @@ PROJECTION_BY_NAME = {projection.__name__: projection for projection in {
 
 def convert_sphere(sphere, projection):
     return (
-        sphere if isinstance(sphere, projection)
+        sphere if projection is None or isinstance(sphere, projection)
         else projection.from_sphere(sphere)
     )
 

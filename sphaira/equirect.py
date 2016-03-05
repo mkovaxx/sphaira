@@ -41,7 +41,7 @@ class Equirect(object):
         return cls.from_array(array)
 
     def to_image(self):
-        return self.array
+        return self.array[0]
 
     def to_gl(self, texture_id):
         # enable texturing

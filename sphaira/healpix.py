@@ -37,7 +37,7 @@ class HealPix(object):
 
     @classmethod
     def from_image(cls, image):
-        assert cls.check_image(image) == 0
+        assert cls.check_image_shape(image.shape[1], image.shape[0]) == 0
         # decompose 4x3 mosaic into healpix faces
         (pos, mid, neg) = [np.hsplit(ring, 4) for ring in np.vsplit(image, 3)]
         array = np.stack(pos + mid + neg)
