@@ -17,7 +17,6 @@
 * use render-to-texture
 * facial recognition tools
 * image stabilization tools
-* consolidate internal memory layouts as (height, width, layers, 4)
 * consolidate GLSL sphere resources to texture arrays (what about cube maps?)
 * lens projection (alpha=0 outside the image rectangle)
 * auto-alignment for image spheres based on feature extraction
