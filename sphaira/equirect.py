@@ -13,18 +13,29 @@ class Equirect(object):
     def check_array(cls, array):
         if array.dtype != np.float32:
             return 1
-        if array.ndim != 3:
+        if array.ndim != 4:
             return 2
-        (height, width, depth) = array.shape
+        (layers, height, width, depth) = array.shape
+        if depth != 4:
+            return 3
+        if layers != 1:
+            return 4
+        if width != 2*height:
+            return 5
+        return 0
+
+    @classmethod
+    def check_image(cls, image):
+        if image.dtype != np.float32:
+            return 1
+        if image.ndim != 3:
+            return 2
+        (height, width, depth) = image.shape
         if depth != 4:
             return 3
         if width != 2*height:
             return 4
         return 0
-
-    @classmethod
-    def check_image(cls, image):
-        return cls.check_array(image)
 
     @classmethod
     def from_array(cls, array):
@@ -33,7 +44,8 @@ class Equirect(object):
 
     @classmethod
     def from_image(cls, image):
-        return cls.from_array(image)
+        array = np.expand_dims(image, 0)
+        return cls.from_array(array)
 
     def to_image(self):
         return self.array
@@ -51,7 +63,7 @@ class Equirect(object):
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
-        (height, width, depth) = self.array.shape
+        (layers, height, width, depth) = self.array.shape
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
         glTexImage2D(
             GL_TEXTURE_2D, 0, GL_RGBA32F,
@@ -81,7 +93,7 @@ vec4 sample(vec3 v) {
         resolution = resolution or sphere.resolution
         height = int(np.sqrt(resolution / 2))
         width = 2*height
-        faces = np.zeros((height, width, 4), dtype=np.float32)
+        faces = np.zeros((1, height, width, 4), dtype=np.float32)
         external.equirect_assign(faces, sphere.array, sphere.sampler)
         return Equirect(faces)
 
@@ -93,8 +105,8 @@ vec4 sample(vec3 v) {
 
     def sample(self, v):
         (t, u) = self._spherical_to_internal(v)
-        (height, width, _) = self.array.shape
-        return self.array[u*(height - 1), t*(width - 1)]
+        (_, height, width, _) = self.array.shape
+        return self.array[0, u*(height - 1), t*(width - 1)]
 
     def _spherical_to_internal(self, v):
         phi = np.arctan2(v.y, v.x)

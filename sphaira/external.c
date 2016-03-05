@@ -82,14 +82,17 @@ static PyObject* equirect_check(PyObject* self, PyObject* args)
   if (PyArray_TYPE(equirect) != NPY_FLOAT32) {
     ret = 3; goto exit;
   }
-  if (PyArray_NDIM(equirect) != 3) {
+  if (PyArray_NDIM(equirect) != 4) {
     ret = 4; goto exit;
   }
-  if (PyArray_DIM(equirect, 2) != 4) {
+  if (PyArray_DIM(equirect, 3) != 4) {
     ret = 5; goto exit;
   }
-  if (2*PyArray_DIM(equirect, 0) != PyArray_DIM(equirect, 1)) {
+  if (PyArray_DIM(equirect, 0) != 1) {
     ret = 6; goto exit;
+  }
+  if (2*PyArray_DIM(equirect, 1) != PyArray_DIM(equirect, 2)) {
+    ret = 7; goto exit;
   }
 exit:
   return PyInt_FromLong(ret);
@@ -150,12 +153,12 @@ static PyObject* equirect_assign(PyObject* self, PyObject* args)
     return NULL;
   }
   sampler = PyCObject_AsVoidPtr(sampler_cobj);
-  height = PyArray_DIM(equirect, 0);
+  height = PyArray_DIM(equirect, 1);
   width = 2*height;
   data = PyArray_DATA(equirect);
-  sy = PyArray_STRIDE(equirect, 0);
-  sx = PyArray_STRIDE(equirect, 1);
-  sd = PyArray_STRIDE(equirect, 2);
+  sy = PyArray_STRIDE(equirect, 1);
+  sx = PyArray_STRIDE(equirect, 2);
+  sd = PyArray_STRIDE(equirect, 3);
   for (y = 0; y < height; y++) {
     for (x = 0; x < width; x++) {
       phi = M_PI*(2.0*x / width - 1.0);
@@ -208,11 +211,11 @@ static void equirect_sample(PyArrayObject* equirect, float* v, float* s) {
   int width, height, sy, sx, sd, y, x, d;
   char* data;
   float phi, r, theta, t, u;
-  height = PyArray_DIM(equirect, 0);
-  width = PyArray_DIM(equirect, 1);
-  sy = PyArray_STRIDE(equirect, 0);
-  sx = PyArray_STRIDE(equirect, 1);
-  sd = PyArray_STRIDE(equirect, 2);
+  height = PyArray_DIM(equirect, 1);
+  width = PyArray_DIM(equirect, 2);
+  sy = PyArray_STRIDE(equirect, 1);
+  sx = PyArray_STRIDE(equirect, 2);
+  sd = PyArray_STRIDE(equirect, 3);
   phi = atan2(v[1], v[0]);
   r = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
   theta = acos(v[2] / r);
