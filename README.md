@@ -55,3 +55,18 @@ Open-source toolset for spherical imaging.
 
 - simple command-line UI
 - switches for overriding input and output projections
+
+
+## Development
+
+### Build
+
+```
+python setup.py build
+```
+
+### Run
+
+```
+python sphaira/build/...
+```
