@@ -1,5 +1,6 @@
 # TODO
 
+* point picking (for aligning image pairs)
 * handle videos
 * use VR headsets
 * spdraw
