@@ -55,7 +55,7 @@ class SphairaView(QGLWidget):
         # compute point on sphere under pointer
         (w, h) = self.viewport
         t = (2*self.old_pos.x() - w) / float(w)
-        u = (2*self.old_pos.y() - h) / float(w)
+        u = -(2*self.old_pos.y() - h) / float(h)
         # compute inverse of view transform ignoring rotation
         m = Matrix44.from_translation(Vector3([0, 0, -self.zoom])) * self.projTransform
         m = matrix44.inverse(m)
@@ -85,7 +85,9 @@ class SphairaView(QGLWidget):
     def keyPressEvent(self, event):
         key = event.key()
         if key == QtCore.Qt.Key_Space:
-            print "picked:", self.picked
+            if self.picked is not None:
+                for i, layer in enumerate(self.layers):
+                    layer.picked = layer.orientation.matrix33 * self.picked
 
     def paintGL(self):
         glClearColor(0, 0, 0, 1);
@@ -101,6 +103,18 @@ class SphairaView(QGLWidget):
         self.mesh.bind()
         for layer in self.layers:
             layer.shader.bind()
+            # show picked point
+            array = (GLdouble * 3)()
+            if layer.picked is None:
+                array[0] = 0
+                array[1] = 0
+                array[2] = 0
+            else:
+                p = layer.orientation.conjugate.matrix33 * layer.picked
+                array[0] = p.x
+                array[1] = p.y
+                array[2] = p.z
+            layer.shader.uniformf_vec3('picked', array)
             layer.shader.uniformf('alphaFactor', layer.alpha())
             m = layer.orientation.matrix33
             array = (GLdouble * 9)()

@@ -47,6 +47,13 @@ class Shader:
                 # retrieve the uniform location, and set
             }[len(vals)](glGetUniformLocation(self.handle, name), *vals)
 
+    # upload a vec3 uniform
+    def uniformf_vec3(self, name, mat):
+        # obtian the uniform location
+        loc = glGetUniformLocation(self.handle, name)
+        # uplaod the 3x3 floating point matrix
+        glUniform3fv(loc, 1, (c_float * 3)(*mat))
+
     # upload a 3x3 matrix uniform
     def uniformf_m3x3(self, name, mat):
         # obtian the uniform location
