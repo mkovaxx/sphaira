@@ -54,11 +54,8 @@ class SphairaView(QGLWidget):
         pos = event.pos()
         # compute point on sphere under pointer
         (w, h) = self.viewport
-        t = self.old_pos.x() / float(w)
-        t = 2*t - 1
-        u = self.old_pos.y() / float(h)
-        u = 2*u - 1
-        u = u * h/float(w)
+        t = (2*self.old_pos.x() - w) / float(w)
+        u = (2*self.old_pos.y() - h) / float(w)
         # compute inverse of view transform ignoring rotation
         m = Matrix44.from_translation(Vector3([0, 0, -self.zoom])) * self.projTransform
         m = matrix44.inverse(m)
