@@ -2,7 +2,7 @@ import copy
 import numpy as np
 from OpenGL.arrays import vbo
 from OpenGL.GL import *
-from pyrr import Vector3
+from pyrr import Vector3, vector
 
 class SphericalMesh(object):
 
@@ -104,3 +104,23 @@ class Icosahedron(TriangleMesh):
         self.vertices = vertices
         self.edges = edges
         self.triangles = triangles
+
+
+def intersectRayUnitSphere(rayOri, rayDir):
+    # (t*rd + ro)^2 = 1
+    # t^2*<rd, rd> + 2*t*<rd, ro> + <ro, ro> - 1 = 0
+    # a := <rd, rd>, b := <rd, ro>, c := <ro, ro> - 1
+    # t := (b +- sqrt(b^2 - a*c)) / a
+    a = vector.dot(rayDir, rayDir)
+    b = vector.dot(rayDir, rayOri)
+    c = vector.dot(rayOri, rayOri) - 1
+    det = b*b - a*c
+    if det < 0:
+        return None
+    det = np.sqrt(det)
+    ts = [(-b + det) / a, (-b - det) / a]
+    ts = filter(lambda x: x >= 0, ts)
+    if ts == []:
+        return None
+    t = min(ts)
+    return rayOri + t*rayDir

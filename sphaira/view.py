@@ -4,13 +4,13 @@ import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLU import gluPerspective
 from PIL import Image
-from pyrr import Quaternion, Vector3, Matrix44
+from pyrr import Quaternion, Vector3, Matrix44, matrix44
 from PySide import QtCore
 from PySide.QtGui import QMainWindow, QApplication, QDockWidget
 from PySide.QtOpenGL import QGLWidget, QGLFormat
 
 import projection as proj
-from geom import SphericalMesh
+from geom import SphericalMesh, intersectRayUnitSphere
 from glsl import Shader
 from layer import Layer, LayerList, LayerListWithToolBar
 
@@ -24,6 +24,7 @@ class SphairaView(QGLWidget):
         super(SphairaView, self).__init__()
         self.old_pos = QtCore.QPoint(0, 0)
         self.setMouseTracking(True)
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.layers = layers
         self.zoom = 0.9
 
@@ -43,6 +44,7 @@ class SphairaView(QGLWidget):
 
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)
+        self.viewport = (w, h)
         self.projTransform = Matrix44.perspective_projection(
             50, float(w) / h,
             0.01, 100.0,
@@ -50,6 +52,20 @@ class SphairaView(QGLWidget):
 
     def mouseMoveEvent(self, event):
         pos = event.pos()
+        # compute point on sphere under pointer
+        (w, h) = self.viewport
+        t = self.old_pos.x() / float(w)
+        t = 2*t - 1
+        u = self.old_pos.y() / float(h)
+        u = 2*u - 1
+        u = u * h/float(w)
+        # compute inverse of view transform ignoring rotation
+        m = Matrix44.from_translation(Vector3([0, 0, -self.zoom])) * self.projTransform
+        m = matrix44.inverse(m)
+        rayOri = m * Vector3([0, 0, 0])
+        rayEnd = m * Vector3([t, u, 1])
+        rayDir = rayEnd - rayOri
+        self.picked = intersectRayUnitSphere(rayOri, rayDir)
         # rotate on left-drag
         if event.buttons() & QtCore.Qt.LeftButton > 0:
             # the rotation vector is the displacement vector rotated by 90 degrees
@@ -68,6 +84,11 @@ class SphairaView(QGLWidget):
             self.zoom = max(0, self.zoom + dz / 100.0)
         self.old_pos = pos
         self.update()
+
+    def keyPressEvent(self, event):
+        key = event.key()
+        if key == QtCore.Qt.Key_Space:
+            print "picked:", self.picked
 
     def paintGL(self):
         glClearColor(0, 0, 0, 1);
