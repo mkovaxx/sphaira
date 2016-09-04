@@ -7,7 +7,7 @@
 // hard-wired FOV for the BublCam
 const float FISHEYE_FOV = 160.0 * M_PI / 180.0;
 
-typedef void (*Sampler)(PyArrayObject* equirect, float* v, float* s);
+typedef void (*Sampler)(PyObject* context, PyArrayObject* data, float* v, float* s);
 
 static PyObject* cube_map_check(PyObject* self, PyObject* args);
 static PyObject* equirect_check(PyObject* self, PyObject* args);
@@ -147,11 +147,12 @@ static PyObject* cube_map_assign(PyObject* self, PyObject* args)
   PyArrayObject* cube_map;
   PyArrayObject* data_sphere;
   PyObject* sampler_cobj;
+  PyObject* sampler_ctx;
   Sampler sampler;
   int size, sf, sy, sx, sd, f, y, x, d;
   char* data;
   float t, u, v[3], s[4];
-  if (!PyArg_ParseTuple(args, "OOO", &cube_map, &data_sphere, &sampler_cobj)) {
+  if (!PyArg_ParseTuple(args, "OOOO", &cube_map, &data_sphere, &sampler_cobj, &sampler_ctx)) {
     return NULL;
   }
   sampler = PyCObject_AsVoidPtr(sampler_cobj);
@@ -174,7 +175,7 @@ static PyObject* cube_map_assign(PyObject* self, PyObject* args)
           case 4: v[0] = +t; v[1] = -u; v[2] = +1; break;
           case 5: v[0] = -t; v[1] = -u; v[2] = -1; break;
         }
-        sampler(data_sphere, v, s);
+        sampler(sampler_ctx, data_sphere, v, s);
         for (d = 0; d < 4; d++) {
           *(float*)(data + f*sf + y*sy + x*sx + d*sd) = s[d];
         }
@@ -189,11 +190,12 @@ static PyObject* equirect_assign(PyObject* self, PyObject* args)
   PyArrayObject* equirect;
   PyArrayObject* data_sphere;
   PyObject* sampler_cobj;
+  PyObject* sampler_ctx;
   Sampler sampler;
   int height, width, sy, sx, sd, y, x, d;
   char* data;
   float phi, theta, v[3], s[4];
-  if (!PyArg_ParseTuple(args, "OOO", &equirect, &data_sphere, &sampler_cobj)) {
+  if (!PyArg_ParseTuple(args, "OOOO", &equirect, &data_sphere, &sampler_cobj, &sampler_ctx)) {
     return NULL;
   }
   sampler = PyCObject_AsVoidPtr(sampler_cobj);
@@ -210,7 +212,7 @@ static PyObject* equirect_assign(PyObject* self, PyObject* args)
       v[0] = sin(theta)*cos(phi);
       v[1] = sin(theta)*sin(phi);
       v[2] = cos(theta);
-      sampler(data_sphere, v, s);
+      sampler(sampler_ctx, data_sphere, v, s);
       for (d = 0; d < 4; d++) {
         *(float*)(data + y*sy + x*sx + d*sd) = s[d];
       }
@@ -224,11 +226,12 @@ static PyObject* fisheye_assign(PyObject* self, PyObject* args)
   PyArrayObject* fisheye;
   PyArrayObject* data_sphere;
   PyObject* sampler_cobj;
+  PyObject* sampler_ctx;
   Sampler sampler;
   int height, width, sy, sx, sd, y, x, d;
   char* data;
   float t, u, r, phi, theta, v[3], s[4];
-  if (!PyArg_ParseTuple(args, "OOO", &fisheye, &data_sphere, &sampler_cobj)) {
+  if (!PyArg_ParseTuple(args, "OOOO", &fisheye, &data_sphere, &sampler_cobj, &sampler_ctx)) {
     return NULL;
   }
   sampler = PyCObject_AsVoidPtr(sampler_cobj);
@@ -248,7 +251,7 @@ static PyObject* fisheye_assign(PyObject* self, PyObject* args)
       v[0] = sin(theta)*cos(phi);
       v[1] = sin(theta)*sin(phi);
       v[2] = cos(theta);
-      sampler(data_sphere, v, s);
+      sampler(sampler_ctx, data_sphere, v, s);
       for (d = 0; d < 4; d++) {
         *(float*)(data + y*sy + x*sx + d*sd) = s[d];
       }
@@ -257,7 +260,7 @@ static PyObject* fisheye_assign(PyObject* self, PyObject* args)
   return Py_None;
 }
 
-static void cube_map_sample(PyArrayObject* cube_map, float* v, float* s) {
+static void cube_map_sample(PyObject* ctx, PyArrayObject* cube_map, float* v, float* s) {
   int size, sf, sy, sx, sd, f, y, x, d;
   char* data;
   float t, u, ax, ay, az;
@@ -289,7 +292,7 @@ static PyObject* cube_map_get_sampler(PyObject* self, PyObject* args) {
   return PyCObject_FromVoidPtr(cube_map_sample, NULL);
 }
 
-static void equirect_sample(PyArrayObject* equirect, float* v, float* s) {
+static void equirect_sample(PyObject* ctx, PyArrayObject* equirect, float* v, float* s) {
   int width, height, sy, sx, sd, y, x, d;
   char* data;
   float phi, r, theta, t, u;
@@ -315,7 +318,7 @@ static PyObject* equirect_get_sampler(PyObject* self, PyObject* args) {
   return PyCObject_FromVoidPtr(equirect_sample, NULL);
 }
 
-static void fisheye_sample(PyArrayObject* fisheye, float* v, float* s) {
+static void fisheye_sample(PyObject* ctx, PyArrayObject* fisheye, float* v, float* s) {
   int width, height, sy, sx, sd, y, x, d;
   char* data;
   float phi, r, theta, t, u;

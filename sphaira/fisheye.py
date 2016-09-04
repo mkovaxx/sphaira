@@ -92,7 +92,7 @@ vec4 sample(vec3 v) {
         width = int(np.sqrt(resolution))
         height = width
         faces = np.zeros((1, height, width, 4), dtype=np.float32)
-        external.fisheye_assign(faces, sphere.array, sphere.sampler)
+        external.fisheye_assign(faces, sphere.array, sphere.sampler, None)
         return Fisheye(faces)
 
     def __init__(self, array):

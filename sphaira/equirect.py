@@ -87,7 +87,7 @@ vec4 sample(vec3 v) {
         height = int(np.sqrt(resolution / 2))
         width = 2*height
         faces = np.zeros((1, height, width, 4), dtype=np.float32)
-        external.equirect_assign(faces, sphere.array, sphere.sampler)
+        external.equirect_assign(faces, sphere.array, sphere.sampler, None)
         return Equirect(faces)
 
     def __init__(self, array):
