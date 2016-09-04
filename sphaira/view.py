@@ -59,7 +59,7 @@ class SphairaView(QGLWidget):
         # compute inverse of view transform ignoring rotation
         m = Matrix44.from_translation(Vector3([0, 0, -self.zoom])) * self.projTransform
         m = matrix44.inverse(m)
-        rayOri = m * Vector3([0, 0, 0])
+        rayOri = m * Vector3([t, u, -1])
         rayEnd = m * Vector3([t, u, 1])
         rayDir = rayEnd - rayOri
         self.picked = intersectRayUnitSphere(rayOri, rayDir)
