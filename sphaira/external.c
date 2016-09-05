@@ -321,14 +321,17 @@ static PyObject* equirect_get_sampler(PyObject* self, PyObject* args) {
 static void fisheye_sample(PyObject* ctx, PyArrayObject* fisheye, float* v, float* s) {
   int width, height, sy, sx, sd, y, x, d;
   char* data;
-  float phi, r, theta, t, u;
+  float phi, r, theta, t, u, fov;
+  if (!PyArg_ParseTuple(ctx, "f", &fov)) {
+      return;
+  }
   height = PyArray_DIM(fisheye, 1);
   width = PyArray_DIM(fisheye, 2);
   sy = PyArray_STRIDE(fisheye, 1);
   sx = PyArray_STRIDE(fisheye, 2);
   sd = PyArray_STRIDE(fisheye, 3);
   theta = atan2(sqrt(v[0]*v[0] + v[1]*v[1]), v[2]);
-  r = theta / FISHEYE_FOV;
+  r = theta / fov;
   if (r > 0.5) {
     for (d = 0; d < 4; d++) {
       s[d] = 0.0;

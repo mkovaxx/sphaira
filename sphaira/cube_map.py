@@ -100,7 +100,7 @@ vec4 sample(vec3 v) {
         resolution = resolution or sphere.resolution
         size = int(np.sqrt(resolution / 6))
         faces = np.zeros((6, size, size, 4), dtype=np.float32)
-        external.cube_map_assign(faces, sphere.array, sphere.sampler, None)
+        external.cube_map_assign(faces, sphere.array, sphere.sampler, (sphere.ctx,))
         return CubeMap(faces)
 
     def __init__(self, faces):
@@ -108,3 +108,4 @@ vec4 sample(vec3 v) {
         assert external.cube_map_check(faces) == 0
         self.array = faces
         self.resolution = int(6 * faces.shape[1]**2)
+        self.ctx = None

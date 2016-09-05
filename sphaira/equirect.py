@@ -87,7 +87,7 @@ vec4 sample(vec3 v) {
         height = int(np.sqrt(resolution / 2))
         width = 2*height
         faces = np.zeros((1, height, width, 4), dtype=np.float32)
-        external.equirect_assign(faces, sphere.array, sphere.sampler, None)
+        external.equirect_assign(faces, sphere.array, sphere.sampler, (sphere.ctx,))
         return Equirect(faces)
 
     def __init__(self, array):
@@ -95,6 +95,7 @@ vec4 sample(vec3 v) {
         assert external.equirect_check(array) == 0
         self.array = array
         self.resolution = int(2 * array.shape[1]**2)
+        self.ctx = None
 
     def sample(self, v):
         (t, u) = self._spherical_to_internal(v)

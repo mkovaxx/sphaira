@@ -5,7 +5,7 @@ from pyrr import Vector3
 import external
 
 # hard-wired FOV for the BublCam
-FISHEYE_FOV = 160.0*np.pi / 180.0
+DEFAULT_FOV = 160.0*np.pi / 180.0
 
 
 class Fisheye(object):
@@ -80,7 +80,7 @@ vec4 sample(vec3 v) {
     return r > 0.5 ? vec4(0.0) : texture2D(fishMap, vec2(t, u));
 }
 '''
-        return shader % FISHEYE_FOV
+        return shader % self.ctx
 
     def bind_glsl_texture(self, texture_id, shader):
         glBindTexture(GL_TEXTURE_2D, texture_id)
@@ -92,14 +92,15 @@ vec4 sample(vec3 v) {
         width = int(np.sqrt(resolution))
         height = width
         faces = np.zeros((1, height, width, 4), dtype=np.float32)
-        external.fisheye_assign(faces, sphere.array, sphere.sampler, None)
+        external.fisheye_assign(faces, sphere.array, sphere.sampler, (sphere.ctx,))
         return Fisheye(faces)
 
-    def __init__(self, array):
+    def __init__(self, array, fov=DEFAULT_FOV):
         # sanity check
         assert external.fisheye_check(array) == 0
         self.array = array
         self.resolution = int(array.shape[1]**2)
+        self.ctx = float(fov)
 
     def sample(self, v):
         (t, u) = self._spherical_to_internal(v)
@@ -109,5 +110,5 @@ vec4 sample(vec3 v) {
     def _spherical_to_internal(self, v):
         phi = np.arctan2(v.y, v.x)
         theta = np.arctan2(np.sqrt(v.x*v.x + v.y*v.y), v.z)
-        r = theta / FISHEYE_FOV
+        r = theta / self.ctx
         return (0.5 + r*cos(phi), 0.5 + r*sin(phi))
